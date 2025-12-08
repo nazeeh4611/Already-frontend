@@ -215,7 +215,7 @@ const Footer = () => {
     <span className="flex items-center gap-2 text-base">
       Designed & Developed by FlyHomies Associates
       <a
-        href="https://www.instagram.com/flyhomies_associates/"
+        href="https://www.flyhomies.com/"
         target="_blank"
         rel="noopener noreferrer"
         className="hover:opacity-70 transition"
