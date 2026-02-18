@@ -1,502 +1,407 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, Plus, Minus } from 'lucide-react';
+import { Search, Calendar, Users, ChevronLeft, ChevronRight, Plus, Minus, MapPin } from 'lucide-react';
 import { createPortal } from "react-dom";
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import gsap from "gsap";
+
+const carouselImages = [
+  { url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', label: 'Luxury Hotel Suite' },
+  { url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', label: 'Infinity Pool' },
+  { url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', label: 'Fine Dining' },
+  { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', label: 'Premium Villas' },
+];
 
 const CustomDatePicker = ({ value, onChange, placeholder, minDate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const dropdownRef = useRef(null);
-
-  const toggleCalendar = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const calendarRef = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+    if (isOpen && calendarRef.current) {
+      gsap.fromTo(calendarRef.current,
+        { scale: 0.92, opacity: 0, y: 16 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" }
+      );
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const formatDate = useCallback((date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }, []);
+  const toggleCalendar = useCallback(() => setIsOpen(o => !o), []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!e.target.closest('.dp-wrapper')) setIsOpen(false);
+    };
+    if (isOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isOpen]);
+
+  const formatDate = useCallback((date) =>
+    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), []);
 
   const generateCalendar = useCallback(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-    const days = [];
-    for (let i = 0; i < 42; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      days.push(currentDate);
-    }
-    return days;
+    const firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    const start = new Date(firstDay);
+    start.setDate(start.getDate() - firstDay.getDay());
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
   }, [selectedDate]);
 
-  const isToday = useCallback((date) => date.toDateString() === new Date().toDateString(), []);
-  const isSameMonth = useCallback((date) => date.getMonth() === selectedDate.getMonth(), [selectedDate]);
-  const isSelected = useCallback((date) => value && date.toDateString() === new Date(value).toDateString(), [value]);
-  
+  const isToday = useCallback((d) => d.toDateString() === new Date().toDateString(), []);
+  const isSameMonth = useCallback((d) => d.getMonth() === selectedDate.getMonth(), [selectedDate]);
+  const isSelected = useCallback((d) => value && d.toDateString() === new Date(value).toDateString(), [value]);
   const isBeforeMinDate = useCallback((date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let compareDate = today;
-    
-    if (minDate) {
-      const min = new Date(minDate);
-      min.setHours(0, 0, 0, 0);
-      compareDate = min > today ? min : today;
-    }
-    
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-    
-    return checkDate < compareDate;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let compare = today;
+    if (minDate) { const m = new Date(minDate); m.setHours(0, 0, 0, 0); compare = m > today ? m : today; }
+    const d = new Date(date); d.setHours(0, 0, 0, 0);
+    return d < compare;
   }, [minDate]);
-  
-  const handleDateSelect = useCallback((date) => { 
-    if (isBeforeMinDate(date)) {
-      toast.error('Cannot select past dates', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      return;
-    }
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`; 
-    onChange(formattedDate); 
-    setIsOpen(false); 
-  }, [onChange, isBeforeMinDate]);
-  
-  
-  const nextMonth = useCallback(() => { 
-    const newDate = new Date(selectedDate); 
-    newDate.setMonth(newDate.getMonth() + 1); 
-    setSelectedDate(newDate); 
-  }, [selectedDate]);
-  
-  const prevMonth = useCallback(() => { 
-    const newDate = new Date(selectedDate); 
-    newDate.setMonth(newDate.getMonth() - 1); 
-    setSelectedDate(newDate); 
-  }, [selectedDate]);
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const handleDateSelect = useCallback((date) => {
+    if (isBeforeMinDate(date)) { toast.error('Cannot select past dates'); return; }
+    const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0');
+    onChange(`${y}-${m}-${d}`);
+    setIsOpen(false);
+  }, [onChange, isBeforeMinDate]);
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
   return (
-    <div className="relative w-full">
-      <div className="relative group">
-        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{color: 'rgb(4, 80, 115)'}} />
-        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{color: 'rgb(4, 80, 115)'}} />
-        <button
-          onClick={toggleCalendar}
-          className="w-full h-14 pl-12 pr-12 rounded-2xl focus:outline-none transition-all duration-300 hover:shadow-lg bg-white cursor-pointer font-medium text-left"
-          style={{
-            border: '2px solid rgb(247, 219, 190)',
-            color: 'rgb(0, 31, 60)'
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = 'rgb(231, 121, 0)';
-            e.target.style.boxShadow = '0 0 0 4px rgba(231, 121, 0, 0.1)';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = 'rgb(247, 219, 190)';
-            e.target.style.boxShadow = 'none';
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.borderColor = 'rgb(231, 121, 0)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.borderColor = 'rgb(247, 219, 190)';
-          }}
-        >
-          {value ? formatDate(new Date(value)) : placeholder}
-        </button>
-      </div>
+    <div className="relative w-full dp-wrapper">
+      <button
+        onClick={toggleCalendar}
+        className="w-full h-14 px-4 text-left bg-white border-2 border-transparent rounded-2xl text-sm font-medium focus:outline-none transition-all duration-200 hover:border-blue-200"
+        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      >
+        <div className="flex items-center gap-3">
+          <Calendar className="h-4 w-4 text-blue-400 shrink-0" />
+          <div>
+            <span className="block text-[10px] font-semibold text-blue-500 uppercase tracking-widest">{placeholder}</span>
+            {value ? (
+              <span className="text-gray-800 text-sm">{formatDate(new Date(value))}</span>
+            ) : (
+              <span className="text-gray-400 text-sm">Select date</span>
+            )}
+          </div>
+        </div>
+      </button>
 
-      {isOpen &&
-        createPortal(
-          <div className="fixed inset-0 z-[99999]">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={toggleCalendar} />
-            <div
-              ref={dropdownRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 w-80 z-[100000]"
-              style={{border: '1px solid rgb(247, 219, 190)'}}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <button onClick={prevMonth} className="p-2 rounded-full transition-colors" style={{color: 'rgb(4, 80, 115)'}} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(247, 219, 190)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}><ChevronLeft className="h-5 w-5" /></button>
-                <h3 className="text-lg font-semibold" style={{color: 'rgb(0, 31, 60)'}}>{monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}</h3>
-                <button onClick={nextMonth} className="p-2 rounded-full transition-colors" style={{color: 'rgb(4, 80, 115)'}} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(247, 219, 190)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}><ChevronRight className="h-5 w-5" /></button>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {dayNames.map(day => (<div key={day} className="text-center text-sm font-medium py-2" style={{color: 'rgb(4, 80, 115)'}}>{day}</div>))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">
-                {generateCalendar().map((date, index) => {
-                  const isPastDate = isBeforeMinDate(date);
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleDateSelect(date)}
-                      disabled={isPastDate}
-                      className="h-10 w-full rounded-lg text-sm font-medium transition-all duration-200"
-                      style={{
-                        color: isPastDate ? 'rgb(200, 200, 200)' :
-                               !isSameMonth(date) ? 'rgb(247, 219, 190)' : 
-                               isSelected(date) ? 'white' :
-                               isToday(date) ? 'white' : 'rgb(0, 31, 60)',
-                        backgroundColor: isSelected(date) ? 'rgb(231, 121, 0)' :
-                                       isToday(date) ? 'rgb(4, 80, 115)' : 'transparent',
-                        cursor: isPastDate ? 'not-allowed' : 'pointer',
-                        opacity: isPastDate ? 0.4 : 1
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSelected(date) && !isToday(date) && !isPastDate) {
-                          e.target.style.backgroundColor = 'rgb(247, 219, 190)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected(date) && !isToday(date) && !isPastDate) {
-                          e.target.style.backgroundColor = 'transparent';
-                        }
-                      }}
-                    >
-                      {date.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
+      {isOpen && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={toggleCalendar} />
+          <div ref={calendarRef} className="relative bg-white rounded-3xl shadow-2xl p-6 w-[340px] border border-blue-100">
+            <div className="flex items-center justify-between mb-5">
+              <button onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth()-1); setSelectedDate(d); }} className="w-9 h-9 rounded-xl bg-blue-50 hover:bg-blue-100 flex items-center justify-center transition-colors">
+                <ChevronLeft className="h-4 w-4 text-blue-600" />
+              </button>
+              <span className="font-bold text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
+              </span>
+              <button onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth()+1); setSelectedDate(d); }} className="w-9 h-9 rounded-xl bg-blue-50 hover:bg-blue-100 flex items-center justify-center transition-colors">
+                <ChevronRight className="h-4 w-4 text-blue-600" />
+              </button>
             </div>
-          </div>,
-          document.body
-        )}
+            <div className="grid grid-cols-7 gap-1 mb-3">
+              {dayNames.map(d => <div key={d} className="text-center text-[11px] font-semibold text-gray-400">{d}</div>)}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {generateCalendar().map((date, i) => {
+                const past = isBeforeMinDate(date);
+                return (
+                  <button key={i} onClick={() => handleDateSelect(date)} disabled={past}
+                    className={`h-10 w-full rounded-xl text-sm font-medium transition-all duration-150
+                      ${past ? 'text-gray-300 cursor-not-allowed' : ''}
+                      ${!past && isSameMonth(date) ? 'text-gray-700 hover:bg-blue-600 hover:text-white' : ''}
+                      ${!past && !isSameMonth(date) ? 'text-gray-300' : ''}
+                      ${isSelected(date) ? '!bg-blue-600 !text-white shadow-md' : ''}
+                      ${isToday(date) && !isSelected(date) ? 'border-2 border-blue-400 text-blue-600 font-bold' : ''}
+                    `}
+                  >
+                    {date.getDate()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
 
 const GuestSelector = React.memo(({ isOpen, onClose, guests, onGuestsChange }) => {
-  const dropdownRef = useRef(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
-    else document.removeEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+    if (isOpen && modalRef.current) {
+      gsap.fromTo(modalRef.current,
+        { scale: 0.92, opacity: 0, y: 16 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" }
+      );
+    }
+  }, [isOpen]);
 
-  const updateGuestCount = useCallback((type, operation) => {
-    const newGuests = { ...guests };
-    if (operation === 'increment') newGuests[type] = Math.min(newGuests[type] + 1, type === 'adults' ? 16 : 5);
-    else newGuests[type] = Math.max(newGuests[type] - 1, type === 'adults' ? 1 : 0);
-    onGuestsChange(newGuests);
+  const update = useCallback((type, op) => {
+    const n = { ...guests };
+    if (op === 'increment') n[type] = Math.min(n[type] + 1, type === 'adults' ? 16 : 5);
+    else n[type] = Math.max(n[type] - 1, type === 'adults' ? 1 : 0);
+    onGuestsChange(n);
   }, [guests, onGuestsChange]);
 
-  const totalGuests = guests.adults + guests.children + guests.infants;
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999]">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div ref={dropdownRef} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-6 min-w-[320px]" style={{border: '1px solid rgb(247, 219, 190)'}}>
-        <div className="space-y-6">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div ref={modalRef} className="relative bg-white rounded-3xl shadow-2xl p-8 w-[360px] border border-blue-100">
+        <h3 className="text-xl font-bold text-gray-900 mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Select Guests</h3>
+        <div className="space-y-5">
           {['adults','children','infants'].map((type) => (
-            <div key={type} className="flex items-center justify-between">
+            <div key={type} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
               <div>
-                <div className="font-medium" style={{color: 'rgb(0, 31, 60)'}}>{type.charAt(0).toUpperCase() + type.slice(1)}</div>
-                <div className="text-sm" style={{color: 'rgb(4, 80, 115)'}}>{type==='adults'?'Ages 13 or above':type==='children'?'Ages 2-12':'Under 2'}</div>
+                <p className="font-semibold text-gray-800 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{type.charAt(0).toUpperCase() + type.slice(1)}</p>
+                <p className="text-xs text-gray-400">{type==='adults'?'Ages 13+':type==='children'?'Ages 2–12':'Under 2'}</p>
               </div>
               <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => updateGuestCount(type,'decrement')} 
-                  disabled={guests[type]<= (type==='adults'?1:0)} 
-                  className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  style={{border: '1px solid rgb(247, 219, 190)', color: 'rgb(4, 80, 115)'}}
-                  onMouseEnter={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.borderColor = 'rgb(231, 121, 0)';
-                      e.target.style.color = 'rgb(231, 121, 0)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.borderColor = 'rgb(247, 219, 190)';
-                      e.target.style.color = 'rgb(4, 80, 115)';
-                    }
-                  }}
-                >
-                  <Minus className="h-4 w-4" />
+                <button onClick={() => update(type,'decrement')} disabled={guests[type] <= (type==='adults'?1:0)}
+                  className="w-9 h-9 rounded-xl border-2 border-blue-200 flex items-center justify-center text-blue-600 disabled:opacity-30 hover:border-blue-500 hover:bg-blue-50 transition-all">
+                  <Minus className="h-3.5 w-3.5" />
                 </button>
-                <span className="w-8 text-center font-medium" style={{color: 'rgb(0, 31, 60)'}}>{guests[type]}</span>
-                <button 
-                  onClick={() => updateGuestCount(type,'increment')} 
-                  disabled={guests[type]>= (type==='adults'?16:5)} 
-                  className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  style={{border: '1px solid rgb(247, 219, 190)', color: 'rgb(4, 80, 115)'}}
-                  onMouseEnter={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.borderColor = 'rgb(231, 121, 0)';
-                      e.target.style.color = 'rgb(231, 121, 0)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.borderColor = 'rgb(247, 219, 190)';
-                      e.target.style.color = 'rgb(4, 80, 115)';
-                    }
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
+                <span className="w-6 text-center font-bold text-gray-800 text-sm">{guests[type]}</span>
+                <button onClick={() => update(type,'increment')} disabled={guests[type] >= (type==='adults'?16:5)}
+                  className="w-9 h-9 rounded-xl border-2 border-blue-200 flex items-center justify-center text-blue-600 disabled:opacity-30 hover:border-blue-500 hover:bg-blue-50 transition-all">
+                  <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
           ))}
-          <div className="pt-4" style={{borderTop: '1px solid rgb(247, 219, 190)'}}>
-            <button 
-              onClick={onClose} 
-              className="w-full px-4 py-2 text-white rounded-xl transition-colors font-medium"
-              style={{backgroundColor: 'rgb(231, 121, 0)'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(250, 153, 56)'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgb(231, 121, 0)'}
-            >
-              Done
-            </button>
-          </div>
         </div>
+        <button onClick={onClose} className="w-full mt-6 py-3 rounded-xl font-semibold text-white text-sm transition-all hover:shadow-lg hover:scale-105"
+          style={{ background: "linear-gradient(135deg, #1d4ed8, #1e40af)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          Done
+        </button>
       </div>
     </div>,
     document.body
   );
 });
 
-const TypewriterText = React.memo(() => {
-  const [typewriterText, setTypewriterText] = useState('');
-  const [typewriterIndex, setTypewriterIndex] = useState(0);
-  const typewriterTexts = ['Dubai Marina Luxury','Downtown Elegance','Palm Jumeirah Paradise','Emirates Hills Grandeur'];
-
-  useEffect(() => {
-    const currentText = typewriterTexts[typewriterIndex];
-    if (typewriterText.length < currentText.length) {
-      const timeout = setTimeout(() => {
-        setTypewriterText(currentText.slice(0, typewriterText.length + 1));
-      }, 100);
-      return () => clearTimeout(timeout);
-    } else {
-      const timeout = setTimeout(() => {
-        setTypewriterText('');
-        setTypewriterIndex((prev) => (prev + 1) % typewriterTexts.length);
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [typewriterText, typewriterIndex, typewriterTexts]);
-
-  return (
-    <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-      {typewriterText}
-      <span className="animate-pulse">|</span>
-    </h1>
-  );
-});
-
 const Hero = () => {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState({adults:1, children:0, infants:0});
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  const [guests, setGuests] = useState({ adults: 1, children: 0, infants: 0 });
   const [guestsOpen, setGuestsOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
 
-  const carouselImages = [
-    {url:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', title:'Dubai Marina Towers'},
-    {url:'https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', title:'Burj Khalifa View'},
-    {url:'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', title:'Dubai Luxury Hotels'},
-    {url:'https://images.unsplash.com/photo-1539650116574-75c0c6d73c6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', title:'Palm Jumeirah Resort'}
-  ];
+  const titleRef = useRef(null);
+  const searchRef = useRef(null);
+  const badgesRef = useRef(null);
+  const slidesRef = useRef([]);
 
   useEffect(() => {
-    setIsVisible(true);
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, {passive:true});
-    return () => {window.removeEventListener('scroll', handleScroll);}
+    const ctx = gsap.context(() => {
+      gsap.fromTo(titleRef.current,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2, delay: 0.3, ease: "power3.out" }
+      );
+      gsap.fromTo(searchRef.current,
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, delay: 0.6, ease: "power2.out" }
+      );
+      if (badgesRef.current?.children) {
+        gsap.fromTo(badgesRef.current.children,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, delay: 1, ease: "power2.out" }
+        );
+      }
+    });
+    return () => ctx.revert();
   }, []);
 
   useEffect(() => {
+    slidesRef.current.forEach((slide, index) => {
+      if (slide) {
+        gsap.to(slide, {
+          opacity: index === currentSlide ? 1 : 0,
+          scale: index === currentSlide ? 1 : 1.06,
+          duration: 1.4,
+          ease: "power2.inOut"
+        });
+      }
+    });
+  }, [currentSlide]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
+      setCurrentSlide(prev => (prev + 1) % carouselImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [carouselImages.length]);
+  }, []);
 
   useEffect(() => {
     if (checkIn && checkOut) {
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      if (checkOutDate <= checkInDate) {
-        const newCheckOut = new Date(checkInDate);
-        newCheckOut.setDate(newCheckOut.getDate() + 1);
-        const year = newCheckOut.getFullYear();
-        const month = String(newCheckOut.getMonth() + 1).padStart(2, "0");
-        const day = String(newCheckOut.getDate()).padStart(2, "0");
-        setCheckOut(`${year}-${month}-${day}`);
+      const ci = new Date(checkIn), co = new Date(checkOut);
+      if (co <= ci) {
+        const next = new Date(ci);
+        next.setDate(next.getDate() + 1);
+        setCheckOut(`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`);
       }
     }
   }, [checkIn, checkOut]);
 
-  const minCheckOutDate = checkIn ? (() => {
-    const date = new Date(checkIn);
-    date.setDate(date.getDate() + 1);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const minCheckOut = checkIn ? (() => {
+    const d = new Date(checkIn);
+    d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   })() : null;
 
   const handleSearch = useCallback(() => {
-    if (!checkIn || !checkOut) {
-      toast.error('Please select both check-in and check-out dates', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      return;
-    }
-    const searchParams = new URLSearchParams({
-      checkin: checkIn,
-      checkout: checkOut,
-      adults: guests.adults.toString(),
-      children: guests.children.toString(),
-      infants: guests.infants.toString()
-    });
-    navigate(`/property?${searchParams.toString()}`);
+    if (!checkIn || !checkOut) { toast.error('Please select check-in and check-out dates'); return; }
+    const p = new URLSearchParams({ checkin: checkIn, checkout: checkOut, adults: guests.adults, children: guests.children, infants: guests.infants });
+    navigate(`/property?${p.toString()}`);
   }, [checkIn, checkOut, guests, navigate]);
 
-  const handleGuestsChange = useCallback((newGuests) => {
-    setGuests(newGuests);
-  }, []);
-
-  const handleGuestsClose = useCallback(() => {
-    setGuestsOpen(false);
-  }, []);
-
   const totalGuests = guests.adults + guests.children + guests.infants;
-  const guestDisplayText = totalGuests === 1 ? '1 Guest' : `${totalGuests} Guests`;
 
   return (
     <>
-      <ToastContainer />
-      <div 
-        className="relative overflow-x-hidden pt-[90px] mb-[120px]" 
-        style={{ backgroundColor: 'rgb(247, 219, 190)' }}
-      >
-        <section className="relative min-h-screen overflow-hidden">
-          <div className="absolute inset-0">
-            {carouselImages.map((image, index) => (
-              <div 
-                key={index} 
-                className={`absolute inset-0 transition-all duration-1000 ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`} 
-                style={{
-                  backgroundImage: `url(${image.url})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  transform: `translateY(${scrollY * 0.1}px)`
-                }} 
-              />
-            ))}
+      <ToastContainer position="top-right" theme="colored" />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap');
+        .hero-wave { position: absolute; bottom: -2px; left: 0; right: 0; height: 80px; }
+      `}</style>
+
+      <div className="relative overflow-hidden" style={{ paddingTop: '68px', minHeight: '580px' }}>
+        <div className="absolute inset-0">
+          {carouselImages.map((img, index) => (
+            <div
+              key={index}
+              ref={el => slidesRef.current[index] = el}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${img.url})`,
+                opacity: index === 0 ? 1 : 0,
+              }}
+            />
+          ))}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(30,58,138,0.83) 0%, rgba(29,78,216,0.72) 50%, rgba(59,130,246,0.56) 100%)' }} />
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+          <div ref={titleRef} className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur border border-white/20">
+              <MapPin className="w-3.5 h-3.5 text-yellow-300" />
+              <span className="text-xs font-semibold text-white/90 tracking-wider uppercase" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Gulf Countries · South Africa · Central Europe
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+              Find Your Next Stay
+            </h1>
+            <p className="text-lg text-blue-100/80 max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Best Hotels Deals — handpicked luxury properties for every journey
+            </p>
           </div>
 
-          <div 
-            className="absolute inset-0 flex flex-col justify-center items-center px-4 text-center"
-            style={{
-              background: `linear-gradient(to right, 
-                rgba(0, 31, 60, 0.8) 0%, 
-                rgba(4, 80, 115, 0.6) 50%, 
-                rgba(0, 31, 60, 0.4) 100%)`
-            }}
-          >
-            <TypewriterText />
-            <p className="text-lg md:text-2xl text-white/90 mb-6">Find your dream stay in Dubai</p>
-
-            <div className="flex flex-col md:flex-row gap-4 max-w-4xl w-full mx-auto">
-              <CustomDatePicker value={checkIn} onChange={setCheckIn} placeholder="Check-in"/>
-              <CustomDatePicker value={checkOut} onChange={setCheckOut} placeholder="Check-out" minDate={minCheckOutDate}/>
-              <div className="relative w-full">
-                <button 
-                  onClick={() => setGuestsOpen(true)} 
-                  className="w-full h-14 pl-4 pr-4 rounded-2xl focus:outline-none transition-all duration-300 hover:shadow-lg bg-white cursor-pointer font-medium text-left"
-                  style={{
-                    border: '2px solid rgb(247, 219, 190)',
-                    color: 'rgb(0, 31, 60)'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = 'rgb(231, 121, 0)';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(231, 121, 0, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgb(247, 219, 190)';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = 'rgb(231, 121, 0)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = 'rgb(247, 219, 190)';
-                  }}
-                >
-                  {guestDisplayText}
-                </button>
+          <div ref={searchRef} className="max-w-5xl mx-auto">
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 border border-blue-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                <div className="px-1 py-1 lg:border-r border-gray-100">
+                  <CustomDatePicker value={checkIn} onChange={setCheckIn} placeholder="Check in" />
+                </div>
+                <div className="px-1 py-1 lg:border-r border-gray-100">
+                  <CustomDatePicker value={checkOut} onChange={setCheckOut} placeholder="Check out" minDate={minCheckOut} />
+                </div>
+                <div className="px-1 py-1 lg:border-r border-gray-100">
+                  <button
+                    onClick={() => setGuestsOpen(true)}
+                    className="w-full h-14 px-4 text-left bg-white border-2 border-transparent rounded-2xl text-sm font-medium text-gray-800 hover:border-blue-200 transition-all duration-200 focus:outline-none"
+                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="h-4 w-4 text-blue-400 shrink-0" />
+                      <div>
+                        <span className="block text-[10px] font-semibold text-blue-500 uppercase tracking-widest">Guests</span>
+                        <span className="text-sm">{totalGuests} guest{totalGuests !== 1 ? 's' : ''}, 1 room</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                <div className="px-1 py-1">
+                  <button
+                    onClick={handleSearch}
+                    className="w-full h-14 rounded-2xl font-bold text-white flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95"
+                    style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  >
+                    <Search className="h-4 w-4" />
+                    Search
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={handleSearch} 
-                className="h-14 px-6 rounded-2xl transition-colors text-white font-semibold flex items-center justify-center gap-2"
-                style={{backgroundColor: 'rgb(231, 121, 0)'}}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Search className="w-5 h-5"/>Search
-              </button>
             </div>
           </div>
-        </section>
-        
-        <GuestSelector 
-          isOpen={guestsOpen} 
-          onClose={handleGuestsClose} 
-          guests={guests} 
-          onGuestsChange={handleGuestsChange}
-        />
+
+          <div ref={badgesRef} className="flex flex-wrap justify-center gap-3 mt-8">
+            {[
+              { icon: '🏨', label: '500+ Properties' },
+              { icon: '⭐', label: '4.9 Avg Rating' },
+              { icon: '🛡️', label: 'DTCM Licensed' },
+              { icon: '💳', label: 'Free Cancellation' },
+            ].map((b) => (
+              <div key={b.label} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur border border-white/20">
+                <span className="text-sm">{b.icon}</span>
+                <span className="text-xs font-semibold text-white/90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{b.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setCurrentSlide(p => (p - 1 + carouselImages.length) % carouselImages.length)}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition-all"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={() => setCurrentSlide(p => (p + 1) % carouselImages.length)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition-all"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+
+        <div className="absolute bottom-10 right-6 z-20 flex gap-2">
+          {carouselImages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={`rounded-full transition-all duration-300 ${i === currentSlide ? 'w-8 h-2.5 bg-yellow-400' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`}
+            />
+          ))}
+        </div>
+
+        <div className="absolute bottom-10 left-6 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 backdrop-blur border border-white/15">
+          <span className="text-xs font-semibold text-white/80" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            {carouselImages[currentSlide].label}
+          </span>
+          <span className="text-white/40 text-xs mx-1">·</span>
+          <span className="text-white/50 text-xs">{currentSlide + 1}/{carouselImages.length}</span>
+        </div>
+
+        <svg className="hero-wave" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="white" />
+        </svg>
       </div>
+
+      <GuestSelector isOpen={guestsOpen} onClose={() => setGuestsOpen(false)} guests={guests} onGuestsChange={setGuests} />
     </>
   );
 };

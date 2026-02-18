@@ -1,233 +1,142 @@
-import React, { useState, useEffect } from 'react';
-import { Phone, Mail, Instagram, Facebook, Linkedin, MessageCircle } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Phone, Mail, Instagram, Facebook, Linkedin, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { FaInstagram } from "react-icons/fa";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Footer = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef(null);
+  const sectionsRef = useRef([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const footerElement = document.getElementById('footer');
-    if (footerElement) {
-      observer.observe(footerElement);
-    }
-
-    return () => observer.disconnect();
+    const ctx = gsap.context(() => {
+      gsap.fromTo(footerRef.current,
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 1, scrollTrigger: { trigger: footerRef.current, start: "top 95%" } }
+      );
+      sectionsRef.current.forEach((s, i) => {
+        if (s) gsap.fromTo(s,
+          { y: 25, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, delay: i * 0.1, ease: "power2.out", scrollTrigger: { trigger: s, start: "top 95%" } }
+        );
+      });
+    });
+    return () => ctx.revert();
   }, []);
 
   return (
-    <footer 
-      id="footer" 
-      className="py-16 px-6 relative overflow-hidden"
-      style={{ backgroundColor: 'rgb(247, 219, 190)' }}
-    >
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(231, 121, 0, 0.05), rgba(231, 121, 0, 0.1))' }}></div>
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(231, 121, 0, 0.3), transparent)' }}></div>
-      
-      <div className="max-w-7xl mx-auto relative">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          <div className={`transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <h3 className="text-2xl font-bold mb-6" style={{ color: 'rgb(231, 121, 0)' }}>
-              Wavescation
+    <footer ref={footerRef} className="text-white pt-14 pb-6 px-4 md:px-6" style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%)' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap');
+        .footer-link { transition: color 0.2s, transform 0.2s; display: block; }
+        .footer-link:hover { color: #fbbf24; transform: translateX(4px); }
+        .footer-contact-item { transition: all 0.2s; }
+        .footer-contact-item:hover { color: #fbbf24; }
+        .footer-contact-item:hover .footer-icon { color: #fbbf24; }
+      `}</style>
+
+      <div className="-mt-14 mb-10 -mx-4 md:-mx-6 overflow-hidden" style={{ height: '60px' }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,20 C360,60 1080,-20 1440,20 L1440,0 L0,0 Z" fill="#f8fafc" />
+        </svg>
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+
+          <div ref={el => sectionsRef.current[0] = el}>
+            <h3 className="text-2xl font-extrabold mb-3 text-white" style={{ fontFamily: "'Sora', sans-serif" }}>
+              Alrkn <span style={{ color: '#fbbf24' }}>Alraqy</span>
             </h3>
-            <p className="mb-6 leading-relaxed" style={{ color: 'rgb(4, 80, 115)' }}>
-              Your gateway to extraordinary luxury staycation experiences across Dubai.
+            <p className="text-sm text-blue-200 mb-5 leading-relaxed">
+              Premier hospitality management delivering exceptional service across the Middle East, South Africa, and Central Europe.
             </p>
-            <div className="flex space-x-3">
-              <a 
-                href="tel:+971522596860" 
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Phone className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
-              <a 
-                href="mailto:Info@wavescation.com"
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Mail className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
-              <a 
-                href="https://www.instagram.com/wavescation_holidayhomes?igsh=MThxb2Z4ZmpqMmQxZA%3D%3D&utm_source=qr"
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Instagram className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
-              <a 
-                href="https://www.facebook.com/share/17PS5QDDa7/?mibextid=wwXIfr"
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Facebook className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
-              <a 
-                href="https://www.linkedin.com/company/wavescation-holiday-homes/"
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <Linkedin className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
-              <a 
-                href="https://wa.me/971522596860"
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer group" 
-                style={{ backgroundColor: 'rgb(231, 121, 0)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(250, 153, 56)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(231, 121, 0)'}
-              >
-                <MessageCircle className="h-4 w-4 text-white group-hover:animate-bounce" />
-              </a>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { href: "tel:0559821924", icon: <Phone className="h-4 w-4" />, label: "Call" },
+                { href: "mailto:a.medjoum@gmail.com", icon: <Mail className="h-4 w-4" />, label: "Mail" },
+                { href: "#", icon: <Instagram className="h-4 w-4" />, label: "Instagram" },
+                { href: "#", icon: <Facebook className="h-4 w-4" />, label: "Facebook" },
+                { href: "#", icon: <Linkedin className="h-4 w-4" />, label: "LinkedIn" },
+              ].map((s, i) => (
+                <a key={i} href={s.href} aria-label={s.label}
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-yellow-400 hover:text-blue-900 transition-all duration-200 hover:scale-110 text-blue-200">
+                  {s.icon}
+                </a>
+              ))}
             </div>
           </div>
-          
-          <div className={`transition-all duration-1000 delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <h4 className="text-lg font-semibold mb-6 relative" style={{ color: 'rgb(0, 31, 60)' }}>
+
+          <div ref={el => sectionsRef.current[1] = el}>
+            <h4 className="font-bold mb-4 text-white flex items-center gap-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <span className="w-1 h-5 rounded-full bg-yellow-400 inline-block" />
               Quick Links
-              <span className="absolute -bottom-2 left-0 w-8 h-0.5" style={{ backgroundColor: 'rgb(231, 121, 0)' }}></span>
             </h4>
-            <div className="space-y-3">
-              <Link to="/about" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                About Us
-              </Link>
-              <Link to="/property" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Properties
-              </Link>
-              <Link to="/contact" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Contact
-              </Link>
+            <div className="space-y-2">
+              {[["About Us", "/about"], ["Properties", "/properties"], ["Contact", "/contact"], ["Blog", "/blog"]].map(([name, path]) => (
+                <Link key={name} to={path} className="footer-link text-sm text-blue-200" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{name}</Link>
+              ))}
             </div>
           </div>
-          
-          <div className={`transition-all duration-1000 delay-400 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <h4 className="text-lg font-semibold mb-6 relative" style={{ color: 'rgb(0, 31, 60)' }}>
-              Dubai Destinations
-              <span className="absolute -bottom-2 left-0 w-8 h-0.5" style={{ backgroundColor: 'rgb(231, 121, 0)' }}></span>
+
+          <div ref={el => sectionsRef.current[2] = el}>
+            <h4 className="font-bold mb-4 text-white flex items-center gap-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <span className="w-1 h-5 rounded-full bg-yellow-400 inline-block" />
+              Our Regions
             </h4>
-            <div className="space-y-3">
-              <a href="/property" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Dubai Marina
-              </a>
-              <a href="/property" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Downtown Dubai
-              </a>
-              <a href="/property" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Palm Jumeirah
-              </a>
-              <a href="/property" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Jumeirah Beach
-              </a>
+            <div className="space-y-2">
+              {["Gulf Countries", "South Africa", "Central Europe", "Middle East"].map(r => (
+                <a key={r} href="/property" className="footer-link text-sm text-blue-200" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{r}</a>
+              ))}
             </div>
           </div>
-          
-          <div className={`transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <h4 className="text-lg font-semibold mb-6 relative" style={{ color: 'rgb(0, 31, 60)' }}>
-              Policies
-              <span className="absolute -bottom-2 left-0 w-8 h-0.5" style={{ backgroundColor: 'rgb(231, 121, 0)' }}></span>
+
+          <div ref={el => sectionsRef.current[3] = el}>
+            <h4 className="font-bold mb-4 text-white flex items-center gap-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <span className="w-1 h-5 rounded-full bg-yellow-400 inline-block" />
+              Contact Us
             </h4>
             <div className="space-y-3">
-              <Link to="/privacy-policy" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Privacy Policy
-              </Link>
-              <Link to="/terms-and-conditions" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Terms & Conditions
-              </Link>
-              <Link to="/refund-policy" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Refund Policy
-              </Link>
-              <Link to="/shipping-policy" className="block transition-all duration-300 hover:translate-x-2 hover:scale-105" 
-                 style={{ color: 'rgb(4, 80, 115)' }}
-                 onMouseEnter={(e) => e.target.style.color = 'rgb(231, 121, 0)'}
-                 onMouseLeave={(e) => e.target.style.color = 'rgb(4, 80, 115)'}>
-                Shipping Policy
-              </Link>
+              <a href="tel:0559821924" className="footer-contact-item flex items-center gap-2.5 group" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-yellow-400/20 flex items-center justify-center shrink-0 transition-colors">
+                  <Phone className="footer-icon h-3.5 w-3.5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+                </div>
+                <span className="text-sm text-blue-200 group-hover:text-yellow-300 transition-colors">0559821924</span>
+              </a>
+              <a href="tel:0505668081" className="footer-contact-item flex items-center gap-2.5 group" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-yellow-400/20 flex items-center justify-center shrink-0 transition-colors">
+                  <Phone className="footer-icon h-3.5 w-3.5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+                </div>
+                <span className="text-sm text-blue-200 group-hover:text-yellow-300 transition-colors">0505668081</span>
+              </a>
+              <a href="mailto:a.medjoum@gmail.com" className="footer-contact-item flex items-center gap-2.5 group" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-yellow-400/20 flex items-center justify-center shrink-0 transition-colors">
+                  <Mail className="footer-icon h-3.5 w-3.5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+                </div>
+                <span className="text-sm text-blue-200 group-hover:text-yellow-300 transition-colors truncate">a.medjoum@gmail.com</span>
+              </a>
+              <a href="mailto:mendjouma@gmail.com" className="footer-contact-item flex items-center gap-2.5 group" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-yellow-400/20 flex items-center justify-center shrink-0 transition-colors">
+                  <Mail className="footer-icon h-3.5 w-3.5 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+                </div>
+                <span className="text-sm text-blue-200 group-hover:text-yellow-300 transition-colors truncate">mendjouma@gmail.com</span>
+              </a>
             </div>
           </div>
         </div>
-        
-        <div
-  className={`pt-8 transition-all duration-1000 delay-800 ${
-    isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-  }`}
-  style={{ borderTop: "1px solid rgb(247, 219, 190)" }}
->
-  <p
-    className="text-center text-lg flex flex-col items-center gap-1"
-    style={{ color: "rgb(4, 80, 115)" }}
-  >
-    © 2025 Wavescation. All rights reserved.
 
-    <span className="flex items-center gap-2 text-base">
-      Designed & Developed by FlyHomies Associates
-      <a
-        href="https://www.flyhomies.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:opacity-70 transition"
-      >
-        <FaInstagram size={18} color="rgb(4, 80, 115)" />
-      </a>
-    </span>
-  </p>
-</div>
+        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-blue-300" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            © 2026 Alrkn Alraqy Hotel Management. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2 text-xs text-blue-300" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <span>Designed & Developed by Alrkn Alraqy</span>
+            <Send className="h-3 w-3 text-yellow-400" />
+          </div>
+        </div>
       </div>
-      
-      <div className="absolute bottom-0 left-0 w-full h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(231, 121, 0, 0.2), transparent)' }}></div>
     </footer>
   );
 };
