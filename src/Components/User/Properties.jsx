@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import {
   Search,
@@ -29,13 +31,30 @@ import {
   ChevronDown,
   Plus,
   Minus,
-  XCircle
+  XCircle,
+  Wifi,
+  Coffee,
+  Wind,
+  Tv,
+  Car,
+  Shield
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import { baseurl } from "../../Base/Base";
 import Navbar from "../../Layout/Navbar";
 import Footer from "../../Layout/Footer";
+
+gsap.registerPlugin(ScrollTrigger);
+
+// Color theme constants
+const colors = {
+  primary: '#fefefd',
+  secondary: '#1846ca',
+  accent: '#ec920f',
+  text: '#1a1a1a',
+  textLight: '#6b7280'
+};
 
 const CustomDatePicker = React.memo(({ value, onChange, placeholder, minDate }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -154,11 +173,11 @@ const CustomDatePicker = React.memo(({ value, onChange, placeholder, minDate }) 
   return (
     <div className="relative w-full">
       <div className="relative group">
-        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-orange-500 transition-colors z-10" />
-        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-orange-500 transition-colors z-10" />
+        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#1846ca] transition-colors z-10" />
+        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#1846ca] transition-colors z-10" />
         <button
           onClick={toggleCalendar}
-          className="w-full h-11 pl-10 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all duration-300 hover:border-orange-300 hover:shadow-md bg-white cursor-pointer text-gray-900 text-sm text-left"
+          className="w-full h-11 pl-10 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1846ca] focus:ring-2 focus:ring-[#1846ca]/20 transition-all duration-300 hover:border-[#1846ca] hover:shadow-md bg-white cursor-pointer text-gray-900 text-sm text-left"
         >
           {value ? formatDate(new Date(value)) : placeholder}
         </button>
@@ -182,7 +201,7 @@ const CustomDatePicker = React.memo(({ value, onChange, placeholder, minDate }) 
                   onClick={prevMonth}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <ChevronLeft className="h-5 w-5 text-[#1846ca]" />
                 </button>
                 <h3 className="text-lg font-semibold">
                   {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
@@ -191,7 +210,7 @@ const CustomDatePicker = React.memo(({ value, onChange, placeholder, minDate }) 
                   onClick={nextMonth}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-5 w-5 text-[#1846ca]" />
                 </button>
               </div>
 
@@ -212,8 +231,8 @@ const CustomDatePicker = React.memo(({ value, onChange, placeholder, minDate }) 
                     className={`
                       h-10 w-full rounded-lg text-sm font-medium transition-all duration-200
                       ${!isSameMonth(date) ? 'text-gray-300' : 'text-gray-700'}
-                      ${isSelected(date) ? 'bg-orange-500 text-white' : ''}
-                      ${isToday(date) && !isSelected(date) ? 'bg-blue-500 text-white' : ''}
+                      ${isSelected(date) ? 'bg-[#1846ca] text-white' : ''}
+                      ${isToday(date) && !isSelected(date) ? 'bg-[#ec920f] text-white' : ''}
                       ${!isSelected(date) && !isToday(date) && !isBeforeMinDate(date) ? 'hover:bg-gray-100' : ''}
                       ${isBeforeMinDate(date) ? 'opacity-30 cursor-not-allowed' : ''}
                     `}
@@ -279,17 +298,17 @@ const GuestSelector = React.memo(({ isOpen, onClose, guests, onGuestsChange }) =
               <button
                 onClick={() => updateGuestCount('adults', 'decrement')}
                 disabled={guests.adults <= 1}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4 text-[#1846ca]" />
               </button>
               <span className="w-8 text-center font-medium">{guests.adults}</span>
               <button
                 onClick={() => updateGuestCount('adults', 'increment')}
                 disabled={guests.adults >= 16}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-[#1846ca]" />
               </button>
             </div>
           </div>
@@ -303,17 +322,17 @@ const GuestSelector = React.memo(({ isOpen, onClose, guests, onGuestsChange }) =
               <button
                 onClick={() => updateGuestCount('children', 'decrement')}
                 disabled={guests.children <= 0}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4 text-[#1846ca]" />
               </button>
               <span className="w-8 text-center font-medium">{guests.children}</span>
               <button
                 onClick={() => updateGuestCount('children', 'increment')}
                 disabled={guests.children >= 5}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-[#1846ca]" />
               </button>
             </div>
           </div>
@@ -327,17 +346,17 @@ const GuestSelector = React.memo(({ isOpen, onClose, guests, onGuestsChange }) =
               <button
                 onClick={() => updateGuestCount('infants', 'decrement')}
                 disabled={guests.infants <= 0}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4 text-[#1846ca]" />
               </button>
               <span className="w-8 text-center font-medium">{guests.infants}</span>
               <button
                 onClick={() => updateGuestCount('infants', 'increment')}
                 disabled={guests.infants >= 5}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#1846ca] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-[#1846ca]" />
               </button>
             </div>
           </div>
@@ -345,7 +364,7 @@ const GuestSelector = React.memo(({ isOpen, onClose, guests, onGuestsChange }) =
           <div className="pt-4 border-t">
             <button
               onClick={onClose}
-              className="w-full px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium"
+              className="w-full px-4 py-2 bg-[#ec920f] text-white rounded-xl hover:bg-[#d8840e] transition-colors font-medium"
             >
               Done
             </button>
@@ -389,12 +408,24 @@ const NeighborhoodScroller = React.memo(({ neighborhoods, filters, onNeighborhoo
     }
   }, []);
 
+  useEffect(() => {
+    gsap.fromTo(scrollContainerRef.current,
+      { x: -50, opacity: 0 },
+      { x: 0, opacity: 1, duration: 1, scrollTrigger: {
+        trigger: scrollContainerRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        toggleActions: "play none none reverse"
+      }}
+    );
+  }, []);
+
   if (neighborhoods.length === 0) return null;
 
   return (
     <section className="mb-8">
-      <div className="relative bg-white rounded-2xl shadow-sm border border-gray-200 p-4" style={{backgroundColor: 'rgb(247, 219, 190)'}}>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Popular Neighborhoods</h3>
+      <div className="relative bg-[#1846ca] rounded-2xl shadow-sm border border-gray-200 p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Popular Neighborhoods</h3>
         
         <div className="relative">
           {showLeftButton && (
@@ -402,7 +433,7 @@ const NeighborhoodScroller = React.memo(({ neighborhoods, filters, onNeighborhoo
               onClick={() => scroll('left')}
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg border border-gray-200 hover:bg-gray-50 p-2 rounded-full transition-all duration-300"
             >
-              <ChevronLeft className="h-5 w-5 text-gray-600" />
+              <ChevronLeft className="h-5 w-5 text-[#1846ca]" />
             </button>
           )}
           
@@ -411,7 +442,7 @@ const NeighborhoodScroller = React.memo(({ neighborhoods, filters, onNeighborhoo
               onClick={() => scroll('right')}
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg border border-gray-200 hover:bg-gray-50 p-2 rounded-full transition-all duration-300"
             >
-              <ChevronRight className="h-5 w-5 text-gray-600" />
+              <ChevronRight className="h-5 w-5 text-[#1846ca]" />
             </button>
           )}
           
@@ -430,8 +461,8 @@ const NeighborhoodScroller = React.memo(({ neighborhoods, filters, onNeighborhoo
                 onClick={() => onNeighborhoodClick(neighborhood.name)}
                 className={`flex-shrink-0 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 ${
                   filters.neighborhood === neighborhood.name
-                    ? 'bg-orange-500 text-white shadow-lg'
-                    : 'bg-gray-100 hover:bg-orange-100 text-gray-700 hover:text-orange-700'
+                    ? 'bg-[#ffffff] text-white shadow-lg'
+                    : 'bg-gray-100 hover:bg-[#fffff]/10 text-gray-700 hover:text-[#000000]'
                 }`}
               >
                 {neighborhood.name}
@@ -486,7 +517,7 @@ const Pagination = React.memo(({ currentPage, totalPages, onPageChange, itemsPer
           disabled={currentPage === 1}
           className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 text-[#1846ca]" />
         </button>
         
         {getVisiblePages.map((page) => (
@@ -495,7 +526,7 @@ const Pagination = React.memo(({ currentPage, totalPages, onPageChange, itemsPer
             onClick={() => onPageChange(page)}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               currentPage === page
-                ? 'bg-orange-500 text-white shadow-md'
+                ? 'bg-[#1846ca] text-white shadow-md'
                 : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
             }`}
           >
@@ -508,7 +539,7 @@ const Pagination = React.memo(({ currentPage, totalPages, onPageChange, itemsPer
           disabled={currentPage === totalPages}
           className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4 text-[#1846ca]" />
         </button>
       </div>
       
@@ -534,9 +565,9 @@ const StarRating = React.memo(({ rating, showCount = false, count = 0, size = 16
             size={size}
             className={`${
               star <= fullStars
-                ? 'fill-yellow-400 text-yellow-400'
+                ? 'fill-[#ec920f] text-[#ec920f]'
                 : star === fullStars + 1 && hasHalfStar
-                ? 'fill-yellow-400 text-yellow-400 opacity-50'
+                ? 'fill-[#ec920f] text-[#ec920f] opacity-50'
                 : 'fill-gray-300 text-gray-300'
             }`}
           />
@@ -556,6 +587,7 @@ const StarRating = React.memo(({ rating, showCount = false, count = 0, size = 16
 
 const PropertyCard = React.memo(({ property, index, likedProperties, onToggleLike, onPropertyClick, hoveredProperty, onMouseEnter, onMouseLeave }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const cardRef = useRef(null);
   
   const propertyTypes = useMemo(() => [
     { value: "Apartment", label: "Apartment", icon: <Building size={16} /> },
@@ -565,6 +597,25 @@ const PropertyCard = React.memo(({ property, index, likedProperties, onToggleLik
     { value: "Townhouse", label: "Townhouse", icon: <Hotel size={16} /> },
     { value: "Office", label: "Office", icon: <Briefcase size={16} /> }
   ], []);
+
+  useEffect(() => {
+    gsap.fromTo(cardRef.current,
+      { y: 30, opacity: 0 },
+      { 
+        y: 0, 
+        opacity: 1, 
+        duration: 0.6, 
+        delay: index * 0.05,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: cardRef.current,
+          start: "top 85%",
+          end: "bottom 15%",
+          toggleActions: "play none none reverse"
+        }
+      }
+    );
+  }, [index]);
 
   const handleToggleLike = useCallback((e) => {
     e.stopPropagation();
@@ -612,17 +663,18 @@ const PropertyCard = React.memo(({ property, index, likedProperties, onToggleLik
 
   return (
     <article
+      ref={cardRef}
       onMouseEnter={() => onMouseEnter(property._id)}
       onMouseLeave={() => onMouseLeave(null)}
-      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer hover:translate-y-[-4px]"
+      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer"
       onClick={handleClick}
     >
-      <div className="relative h-64 overflow-hidden bg-gray-200">
+      <div className="relative h-56 overflow-hidden bg-gray-100">
         {property.images && property.images.length > 0 ? (
           <>
             {!imageLoaded && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+                <Loader2 className="h-8 w-8 text-[#1846ca] animate-spin" />
               </div>
             )}
             <img
@@ -630,7 +682,7 @@ const PropertyCard = React.memo(({ property, index, likedProperties, onToggleLik
                 ? property.images[1].url 
                 : property.images[0].url}
               alt={property.title}
-              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               loading="lazy"
@@ -643,126 +695,83 @@ const PropertyCard = React.memo(({ property, index, likedProperties, onToggleLik
           </div>
         )}
 
-        <div className="absolute top-4 left-4">
-          <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium">
+        <div className="absolute top-3 left-3">
+          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 shadow-sm">
             {propertyTypes.find(t => t.value === property.type)?.icon}
             <span>{property.type}</span>
           </div>
         </div>
 
-        {/* <button
-          onClick={handleToggleLike}
-          className={`absolute top-4 right-4 p-2.5 rounded-full shadow-lg transition-all duration-300 ${
-            likedProperties.includes(property._id)
-              ? "bg-red-500 text-white scale-110"
-              : "bg-white/95 hover:bg-white text-gray-700"
-          }`}
-        >
-          <Heart 
-            size={18} 
-            fill={likedProperties.includes(property._id) ? "currentColor" : "none"} 
-          />
-        </button> */}
-
         {property.images && property.images.length > 1 && (
-          <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium">
-            1/{property.images.length}
-          </div>
-        )}
-
-        {property.propertyHighlights && property.propertyHighlights.length > 0 && (
-          <div className="absolute bottom-4 left-4">
-            <div className="bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium">
-              {property.propertyHighlights[0].name}
-            </div>
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-medium">
+            {property.images.length} photos
           </div>
         )}
       </div>
 
-      <div className="p-6">
-        <div className="mb-4">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-orange-600 transition-colors flex-1">
-              {property.title || "Untitled Property"}
-            </h3>
-          </div>
-          
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="font-semibold text-base text-gray-900 line-clamp-1 flex-1">
+            {property.title || "Untitled Property"}
+          </h3>
           {hasRatings && (
-            <div className="mb-2">
-              <StarRating 
-                rating={rating} 
-                showCount={true}
-                count={reviewCount}
-                size={14}
-              />
+            <div className="flex items-center gap-1 bg-[#ec920f]/10 px-2 py-1 rounded-full">
+              <Star className="h-3 w-3 fill-[#ec920f] text-[#ec920f]" />
+              <span className="text-xs font-medium text-gray-700">{rating.toFixed(1)}</span>
             </div>
           )}
-          
-          <div className="flex items-center text-gray-500 text-sm gap-1">
-            <MapPin size={14} />
-            <span className="line-clamp-1">
-              {property.neighborhood?.name || property.location || "Location not specified"}
-            </span>
-          </div>
+        </div>
+        
+        <div className="flex items-center text-gray-500 text-xs gap-1 mb-3">
+          <MapPin size={12} className="text-[#1846ca]" />
+          <span className="line-clamp-1">
+            {property.neighborhood?.name || property.location || "Location not specified"}
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+        <div className="flex flex-wrap gap-3 text-xs text-gray-600 mb-3">
           {property.bedrooms && (
-            <div className="flex items-center gap-2">
-              <Bed size={16} className="text-gray-400" />
-              <span>{property.bedrooms} Bed{property.bedrooms !== 1 ? 's' : ''}</span>
+            <div className="flex items-center gap-1">
+              <Bed size={14} className="text-[#1846ca]" />
+              <span>{property.bedrooms} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
             </div>
           )}
           {property.bathrooms && (
-            <div className="flex items-center gap-2">
-              <Bath size={16} className="text-gray-400" />
-              <span>{property.bathrooms} Bath{property.bathrooms !== 1 ? 's' : ''}</span>
+            <div className="flex items-center gap-1">
+              <Bath size={14} className="text-[#1846ca]" />
+              <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
             </div>
           )}
           {property.guests && (
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-gray-400" />
-              <span>{property.guests} Guest{property.guests !== 1 ? 's' : ''}</span>
-            </div>
-          )}
-          {property.area && (
-            <div className="flex items-center gap-2">
-              <Square size={16} className="text-gray-400" />
-              <span>{property.area} m²</span>
+            <div className="flex items-center gap-1">
+              <Users size={14} className="text-[#1846ca]" />
+              <span>Up to {property.guests} guests</span>
             </div>
           )}
         </div>
 
-        {property.amenities && property.amenities.general && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
-              {property.amenities.general.slice(0, 3).map((amenity, idx) => (
-                <span key={idx} className="bg-gray-50 text-gray-600 px-2 py-1 rounded-full text-xs">
-                  {amenity.name}
-                </span>
-              ))}
-              {property.amenities.general.length > 3 && (
-                <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded-full text-xs">
-                  +{property.amenities.general.length - 3} more
-                </span>
-              )}
-            </div>
+        {property.amenities?.general && property.amenities.general.length > 0 && (
+          <div className="flex items-center gap-1 mb-4">
+            {property.amenities.general.slice(0, 3).map((amenity, idx) => (
+              <span key={idx} className="bg-gray-50 text-gray-600 px-2 py-1 rounded-md text-xs border border-gray-100">
+                {amenity.name}
+              </span>
+            ))}
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+        <div className="flex items-end justify-between pt-3 border-t border-gray-100">
           <div>
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-lg font-bold text-[#1846ca]">
               AED {displayPrice.price !== null ? displayPrice.price.toLocaleString() : 'N/A'}
             </span>
-            <span className="text-gray-500 text-sm ml-1">{displayPrice.period}</span>
+            <span className="text-gray-500 text-xs ml-1">{displayPrice.period}</span>
           </div>
           <button
             onClick={handleViewClick}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-orange-500 hover:text-white text-gray-700 rounded-lg transition-all duration-300 text-xs font-medium flex items-center gap-1"
+            className="px-4 py-2 bg-[#ec920f] hover:bg-[#d6820e] text-white rounded-lg transition-all duration-300 text-xs font-medium shadow-sm hover:shadow-md"
           >
-            <Eye size={14} />
-            View
+            View Details
           </button>
         </div>
       </div>
@@ -780,11 +789,11 @@ const DateAvailabilityMessage = React.memo(({ checkIn, checkOut, onClearDates })
   };
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-2xl p-6 shadow-lg max-w-2xl mx-auto my-8">
+    <div className="bg-gradient-to-br from-[#1846ca]/5 to-[#ec920f]/5 border-2 border-[#ec920f]/20 rounded-2xl p-6 shadow-lg max-w-2xl mx-auto my-8">
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
-          <div className="bg-orange-100 rounded-full p-3">
-            <AlertCircle className="h-8 w-8 text-orange-600" />
+          <div className="bg-[#ec920f]/10 rounded-full p-3">
+            <AlertCircle className="h-8 w-8 text-[#ec920f]" />
           </div>
         </div>
         
@@ -793,9 +802,9 @@ const DateAvailabilityMessage = React.memo(({ checkIn, checkOut, onClearDates })
             No Properties Available for Selected Dates
           </h3>
           
-          <div className="bg-white rounded-lg p-4 mb-4 border border-orange-100">
+          <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
             <div className="flex items-center gap-2 text-gray-700 mb-2">
-              <Calendar className="h-5 w-5 text-orange-500" />
+              <Calendar className="h-5 w-5 text-[#ec920f]" />
               <span className="font-semibold">Your Selected Dates:</span>
             </div>
             <div className="text-gray-600 ml-7">
@@ -812,22 +821,22 @@ const DateAvailabilityMessage = React.memo(({ checkIn, checkOut, onClearDates })
           
           <ul className="space-y-2 mb-4 text-gray-600">
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 font-bold">•</span>
+              <span className="text-[#ec920f] font-bold">•</span>
               <span>Selecting different dates</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 font-bold">•</span>
+              <span className="text-[#ec920f] font-bold">•</span>
               <span>Reducing your stay duration</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 font-bold">•</span>
+              <span className="text-[#ec920f] font-bold">•</span>
               <span>Browsing all properties without date filters</span>
             </li>
           </ul>
           
           <button
             onClick={onClearDates}
-            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[#ec920f] to-[#d6820e] hover:from-[#d6820e] hover:to-[#c0770c] text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
             Clear Dates & View All Properties
           </button>
@@ -861,6 +870,8 @@ const Properties = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mainContentRef = useRef(null);
+  const heroRef = useRef(null);
+  const searchRef = useRef(null);
   
   const [filters, setFilters] = useState({
     priceRange: [0, 200000],
@@ -871,6 +882,22 @@ const Properties = () => {
     minArea: "",
     neighborhood: ""
   });
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(heroRef.current,
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
+      );
+
+      gsap.fromTo(searchRef.current,
+        { scale: 0.98, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.8, delay: 0.2, ease: "power2.out" }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   const propertyTypes = useMemo(() => [
     { value: "Apartment", label: "Apartment", icon: <Building size={16} /> },
@@ -1190,19 +1217,18 @@ const Properties = () => {
   }, [updateUrlWithPage, fetchProperties]);
 
   const PropertySkeleton = React.memo(() => (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
-      <div className="h-64 bg-gradient-to-r from-gray-100 to-gray-200"></div>
-      <div className="p-6 space-y-4">
-        <div className="h-6 bg-gray-200 rounded-lg"></div>
-        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-        <div className="flex gap-4">
-          <div className="h-4 bg-gray-200 rounded w-16"></div>
+    <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse border border-gray-100">
+      <div className="h-56 bg-gradient-to-r from-gray-100 to-gray-200"></div>
+      <div className="p-5 space-y-3">
+        <div className="h-5 bg-gray-200 rounded-lg w-3/4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div className="flex gap-3">
           <div className="h-4 bg-gray-200 rounded w-16"></div>
           <div className="h-4 bg-gray-200 rounded w-16"></div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="h-6 bg-gray-200 rounded w-20"></div>
-          <div className="h-8 bg-gray-200 rounded w-20"></div>
+        <div className="flex justify-between items-center pt-2">
+          <div className="h-5 bg-gray-200 rounded w-20"></div>
+          <div className="h-8 bg-gray-200 rounded w-24"></div>
         </div>
       </div>
     </div>
@@ -1224,14 +1250,14 @@ const Properties = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-8 text-center max-w-md">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+      <div className="min-h-screen bg-[#fefefd] flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 text-center max-w-md border border-gray-200">
+          <AlertCircle className="w-16 h-16 text-[#ec920f] mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Something went wrong</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl transition-all duration-300"
+            className="bg-[#ec920f] hover:bg-[#d6820e] text-white px-6 py-3 rounded-xl transition-all duration-300"
           >
             Try Again
           </button>
@@ -1243,25 +1269,25 @@ const Properties = () => {
   return (
     <>
       <ToastContainer />
-      <div className="min-h-screen bg-slate-50">
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen bg-[#fefefd]">
+        <div className="min-h-screen bg-gradient-to-b from-[#fefefd] to-white">
           <Navbar />
 
           <main ref={mainContentRef} className="container mx-auto px-4 pt-24 pb-10">
-            <section className="mb-8 text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-700 to-orange-600">
-                Discover Premium Properties
+            <section ref={heroRef} className="mb-8 text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Find Your Next Stay
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Find your perfect accommodation from our curated collection of luxury properties
+                Prest Hotels Deals — handpicked luxury properties for every journey
               </p>
             </section>
 
-            <section className="mb-8">
-              <div className="rounded-2xl shadow-lg border border-gray-200 p-6" style={{backgroundColor: 'rgb(247, 219, 190)'}}>
+            <section ref={searchRef} className="mb-8">
+              <div className="rounded-2xl shadow-lg border border-gray-200 p-6 bg-[#1846ca]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Check In</label>
+                    <label className="block text-sm font-medium text-white mb-2">Check In</label>
                     <CustomDatePicker
                       value={checkIn}
                       onChange={setCheckIn}
@@ -1270,7 +1296,7 @@ const Properties = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Check Out</label>
+                    <label className="block text-sm font-medium text-white mb-2">Check Out</label>
                     <CustomDatePicker
                       value={checkOut}
                       onChange={setCheckOut}
@@ -1280,13 +1306,13 @@ const Properties = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Guests</label>
+                    <label className="block text-sm font-medium text-[#1846ca] mb-2">Guests</label>
                     <div className="relative group">
-                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-orange-500 transition-colors z-10" />
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-orange-500 transition-colors z-10" />
+                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#1846ca] transition-colors z-10" />
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#1846ca] transition-colors z-10" />
                       <button
                         onClick={() => setGuestsOpen(!guestsOpen)}
-                        className="w-full h-11 pl-10 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all duration-300 hover:border-orange-300 hover:shadow-md bg-white cursor-pointer text-gray-900 text-sm text-left"
+                        className="w-full h-11 pl-10 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1846ca] focus:ring-2 focus:ring-[#1846ca]/20 transition-all duration-300 hover:border-[#1846ca] hover:shadow-md bg-white cursor-pointer text-gray-900 text-sm text-left"
                       >
                         {guestDisplayText}
                       </button>
@@ -1296,10 +1322,7 @@ const Properties = () => {
                   <div className="flex items-end gap-2">
                     <button
                       onClick={handleNewSearch}
-                      className="flex-1 h-11 rounded-xl font-medium text-white bg-orange-500 hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                      style={{ 
-                        background: `linear-gradient(to right, rgb(231, 121, 0), rgb(250, 153, 56))`,
-                      }}
+                      className="flex-1 h-11 rounded-xl font-medium text-white bg-[#ec920f] hover:bg-[#d6820e] transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                     >
                       <Search className="h-4 w-4"/>
                       Search
@@ -1310,7 +1333,7 @@ const Properties = () => {
                         className="h-11 px-4 rounded-xl font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 transition-all duration-300 flex items-center justify-center gap-2"
                         title="Clear search"
                       >
-                        <XCircle className="h-4 w-4"/>
+                        <XCircle className="h-4 w-4 text-[#ec920f]"/>
                       </button>
                     )}
                   </div>
@@ -1328,7 +1351,7 @@ const Properties = () => {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div className="relative flex-1 max-w-2xl">
                   <div className="flex items-center gap-3 bg-white shadow-sm border border-gray-200 px-4 py-3 rounded-xl hover:shadow-md transition-all duration-300">
-                    <Search className="text-gray-400" size={20} />
+                    <Search className="text-[#ec920f]" size={20} />
                     <input
                       type="text"
                       placeholder="Search by property name, location, or neighborhood..."
@@ -1344,7 +1367,7 @@ const Properties = () => {
                     onClick={() => setFilterOpen(!filterOpen)}
                     className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-sm transition-all duration-300 ${
                       filterOpen 
-                        ? 'bg-black text-white' 
+                        ? 'bg-[#1846ca] text-white' 
                         : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
                     }`}
                   >
@@ -1373,7 +1396,7 @@ const Properties = () => {
                       <h3 className="text-lg font-semibold text-gray-800">Filter Properties</h3>
                       <button
                         onClick={resetFilters}
-                        className="text-orange-500 hover:text-orange-600 text-sm font-medium transition-colors"
+                        className="text-[#ec920f] hover:text-[#d6820e] text-sm font-medium transition-colors"
                       >
                         Reset All
                       </button>
@@ -1391,7 +1414,7 @@ const Properties = () => {
                           step="5000"
                           value={filters.priceRange[1]}
                           onChange={(e) => handleFilterChange('priceRange', [0, +e.target.value])}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1846ca]"
                         />
                       </div>
 
@@ -1402,7 +1425,7 @@ const Properties = () => {
                         <select
                           value={filters.propertyType}
                           onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-gray-300 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-[#1846ca] transition-colors"
                         >
                           <option value="">All Types</option>
                           {propertyTypes.map((type) => (
@@ -1420,7 +1443,7 @@ const Properties = () => {
                         <select
                           value={filters.neighborhood}
                           onChange={(e) => handleFilterChange('neighborhood', e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-gray-300 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-[#1846ca] transition-colors"
                         >
                           <option value="">All Neighborhoods</option>
                           {neighborhoods.map((neighborhood) => (
@@ -1440,7 +1463,7 @@ const Properties = () => {
                           value={filters.minArea}
                           onChange={(e) => handleFilterChange('minArea', e.target.value)}
                           placeholder="Any size"
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-gray-300 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none hover:border-[#1846ca] transition-colors"
                         />
                       </div>
 
@@ -1456,7 +1479,7 @@ const Properties = () => {
                                 filters.bedrooms === num.toString() ? "" : num.toString())}
                               className={`px-3 py-2 rounded-lg text-sm transition-all ${
                                 filters.bedrooms === num.toString()
-                                  ? 'bg-orange-500 text-white'
+                                  ? 'bg-[#1846ca] text-white'
                                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                               }`}
                             >
@@ -1478,7 +1501,7 @@ const Properties = () => {
                                 filters.bathrooms === num.toString() ? "" : num.toString())}
                               className={`px-3 py-2 rounded-lg text-sm transition-all ${
                                 filters.bathrooms === num.toString()
-                                  ? 'bg-orange-500 text-white'
+                                  ? 'bg-[#1846ca] text-white'
                                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                               }`}
                             >
@@ -1500,7 +1523,7 @@ const Properties = () => {
                                 filters.guests === num.toString() ? "" : num.toString())}
                               className={`px-3 py-2 rounded-lg text-sm transition-all ${
                                 filters.guests === num.toString()
-                                  ? 'bg-orange-500 text-white'
+                                  ? 'bg-[#1846ca] text-white'
                                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                               }`}
                             >
@@ -1537,8 +1560,8 @@ const Properties = () => {
                   />
                 ) : (
                   <div className="text-center py-16">
-                    <div className="bg-white rounded-2xl shadow-sm p-8 max-w-md mx-auto">
-                      <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <div className="bg-white rounded-2xl shadow-sm p-8 max-w-md mx-auto border border-gray-200">
+                      <Search className="w-16 h-16 text-[#ec920f] mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-800 mb-2">No properties found</h3>
                       <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
                       <button
@@ -1547,7 +1570,7 @@ const Properties = () => {
                           resetFilters();
                           clearSearch();
                         }}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300"
+                        className="bg-[#ec920f] hover:bg-[#d6820e] text-white px-6 py-3 rounded-xl transition-all duration-300"
                       >
                         Clear All Filters
                       </button>
@@ -1598,7 +1621,7 @@ const Properties = () => {
           href="https://wa.me/971522596860"
           target="_blank"
           rel="noopener noreferrer"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
+          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform border border-gray-200"
         >
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
@@ -1608,7 +1631,7 @@ const Properties = () => {
         </a>
         <a
           href="mailto:Info@wavescation.com"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
+          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform border border-gray-200"
         >
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png"
@@ -1618,9 +1641,9 @@ const Properties = () => {
         </a>
         <a
           href="tel:+971522596860"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
+          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform border border-gray-200"
         >
-          <svg className="h-10 w-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-10 w-10 text-[#ec920f]" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
           </svg>
         </a>

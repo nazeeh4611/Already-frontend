@@ -1,371 +1,281 @@
+// ContactPage.jsx
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle, User, Building } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Navbar from '../../Layout/Navbar';
 import Footer from '../../Layout/Footer';
 
-const ContactPage = () => {
+export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    subject: '',
-    message: '',
-    inquiryType: 'general'
+    propertyType: '',
+    message: ''
   });
   const [loading, setLoading] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+    
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'f1a19ad9-9569-420e-81a0-b84474abd66a', // 🔴 replace this
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          inquiryType: formData.inquiryType,
-          message: formData.message
+          access_key: 'f1a19ad9-9569-420e-81a0-b84474abd66a',
+          ...formData
         })
       });
-  
+      
       const result = await response.json();
-  
+      
       if (result.success) {
-        toast.success('Thank you! Your message has been sent successfully.');
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-          inquiryType: 'general'
+        toast.success('Message sent successfully!');
+        setFormData({ 
+          name: '', 
+          email: '', 
+          phone: '', 
+          propertyType: '', 
+          message: '' 
         });
-      } else {
-        toast.error('Something went wrong. Please try again.');
       }
     } catch (error) {
-      toast.error('Failed to send message. Please try again.');
+      toast.error('Failed to send message');
     } finally {
       setLoading(false);
     }
   };
-  
-
-  const contactInfo = [
-    {
-      icon: MapPin,
-      title: 'Office Address',
-      details: ['Iris Tower, Business Bay', 'Dubai, UAE'],
-      color: 'text-gray-700',
-      href: 'https://maps.google.com/?q=Iris+Tower+Business+Bay+Dubai+UAE'
-    },
-    {
-      icon: Phone,
-      title: 'Phone Number',
-      details: ['+971 52 259 6860', '+971 55 517 5056'],
-      color: 'text-gray-700',
-      href: '' 
-    },
-    {
-      icon: Mail,
-      title: 'Email Address',
-      details: ['info@wavesglobal.ae'],
-      color: 'text-gray-700',
-      href: 'mailto:info@wavesglobal.ae'
-    },
-    {
-      icon: Clock,
-      title: 'Business Hours',
-      details: ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat - Sun: 10:00 AM - 4:00 PM'],
-      color: 'text-gray-700'
-    }
-  ];
-  
-
-  const teamMembers = [
-    {
-      name: 'Mrs. Surya Sijil',
-      position: 'Managing Director',
-      icon: User
-    },
-    {
-      name: 'Mr. Sijil Sidharthan',
-      position: 'CEO',
-      icon: User
-    },
-    {
-      name: 'Mr. Aghil Shajahan',
-      position: 'Operation Manager',
-      icon: User
-    }
-  ];
-
-  const services = [
-    'Full Property Management',
-    'Dynamic Pricing Strategies',
-    '24/7 Guest Communication',
-    'Professional Photography',
-    'Maintenance & Housekeeping',
-    'Owner Reporting'
-  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <div className="pt-28">
-        
-        <div style={{ background: 'rgb(247, 219, 190)' }} className="text-gray-800 py-20">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Get In Touch</h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Ready to transform your property into a premium holiday home? Contact Wavescation today and discover how we can maximize your returns while providing exceptional guest experiences.
-            </p>
+      
+      <div className="pt-16 md:pt-20 pb-16">
+        {/* Hero Section */}
+        <div className="relative bg-[#333BF5] overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="white" strokeWidth="0.5"/>
+            </svg>
+          </div>
+          <div className="px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div className="max-w-3xl mx-auto text-center">
+              <span className="text-white/80 text-xs md:text-sm tracking-widest uppercase mb-3 md:mb-4 block">Get in Touch</span>
+              <h1 className="text-4xl md:text-6xl font-light text-white mb-4 md:mb-6 leading-tight">
+                Partner With
+                <span className="block font-semibold mt-1 md:mt-2">Alrkn Alraqy</span>
+              </h1>
+              <div className="w-20 md:w-24 h-1 bg-[#FFD700] mx-auto mb-6 md:mb-8"></div>
+              <p className="text-base md:text-xl text-white/90 leading-relaxed">
+                Let's discuss how we can elevate your property with our premium hotel management services.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h2 className="text-2xl font-bold text-black mb-6 flex items-center gap-3">
-                  <Send className="w-6 h-6 text-gray-700" />
-                  Send Us a Message
+        {/* Contact Section */}
+        <div className="px-4 sm:px-6 lg:px-8 -mt-8 md:-mt-16">
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-12 mb-16 md:mb-24">
+            <div className="grid lg:grid-cols-2 gap-8 md:gap-16">
+              {/* Contact Form */}
+              <div>
+                <span className="text-[#FFD700] text-xs md:text-sm tracking-widest uppercase mb-3 md:mb-4 block">Inquiry Form</span>
+                <h2 className="text-2xl md:text-4xl font-light text-[#333BF5] mb-8 md:mb-12">
+                  Interested in Our
+                  <span className="block font-semibold mt-1 md:mt-2">Management Services?</span>
                 </h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                        placeholder="Enter your email address"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Inquiry Type</label>
-                      <select
-                        name="inquiryType"
-                        value={formData.inquiryType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                      >
-                        <option value="general">General Inquiry</option>
-                        <option value="property">Property Management</option>
-                        <option value="booking">Guest Booking</option>
-                        <option value="partnership">Partnership</option>
-                        <option value="support">Support</option>
-                      </select>
-                    </div>
-                  </div>
-
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
                     <input
                       type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
+                      placeholder="Your Full Name *"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                       required
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                      placeholder="Enter message subject"
+                      className="w-full px-0 py-2 md:py-3 bg-transparent border-b border-[#333BF5]/20 focus:border-[#FFD700] outline-none text-[#333BF5] text-sm md:text-base placeholder-[#333BF5]/40 transition-colors"
                     />
                   </div>
-
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
+                    <input
+                      type="email"
+                      placeholder="Email Address *"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
                       required
-                      rows={6}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent resize-none"
-                      placeholder="Tell us about your inquiry..."
+                      className="w-full px-0 py-2 md:py-3 bg-transparent border-b border-[#333BF5]/20 focus:border-[#FFD700] outline-none text-[#333BF5] text-sm md:text-base placeholder-[#333BF5]/40 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <input
+                      type="tel"
+                      placeholder="Phone Number *"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      required
+                      className="w-full px-0 py-2 md:py-3 bg-transparent border-b border-[#333BF5]/20 focus:border-[#FFD700] outline-none text-[#333BF5] text-sm md:text-base placeholder-[#333BF5]/40 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <select
+                      value={formData.propertyType}
+                      onChange={(e) => setFormData({...formData, propertyType: e.target.value})}
+                      required
+                      className="w-full px-0 py-2 md:py-3 bg-transparent border-b border-[#333BF5]/20 focus:border-[#FFD700] outline-none text-[#333BF5] text-sm md:text-base"
+                    >
+                      <option value="" disabled selected>Property Type *</option>
+                      <option value="hotel">Hotel</option>
+                      <option value="resort">Resort</option>
+                      <option value="serviced-apartment">Serviced Apartment</option>
+                      <option value="villa">Villa</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <textarea
+                      placeholder="Tell us about your property and requirements *"
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      required
+                      rows="4"
+                      className="w-full px-0 py-2 md:py-3 bg-transparent border-b border-[#333BF5]/20 focus:border-[#FFD700] outline-none text-[#333BF5] text-sm md:text-base placeholder-[#333BF5]/40 transition-colors resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    style={{ backgroundColor: 'rgb(247, 219, 190)' }}
-                    className="w-full text-gray-800 py-3 px-6 rounded-xl hover:bg-opacity-80 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
+                    className="inline-flex items-center justify-center md:justify-start space-x-2 md:space-x-3 bg-[#333BF5] text-white px-6 md:px-8 py-3 md:py-4 rounded-full w-full md:w-auto hover:bg-[#FFD700] transition-all duration-300 disabled:opacity-50 group"
                   >
-                    {loading ? (
-                      <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5" />
-                    )}
-                    {loading ? 'Sending...' : 'Send Message'}
+                    <span className="font-medium text-sm md:text-base">
+                      {loading ? 'Sending...' : 'Send Inquiry'}
+                    </span>
+                    <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
                   </button>
                 </form>
               </div>
-            </div>
 
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-xl font-bold text-black mb-6">Contact Information</h3>
-                <div className="space-y-6">
-                  {contactInfo.map((info, index) => {
-                    const IconComponent = info.icon;
-                    return (
-                      <div key={index} className="flex gap-4">
-                        <div className="flex-shrink-0">
-                          <div style={{ backgroundColor: 'rgba(247, 219, 190, 0.2)' }} className="w-12 h-12 rounded-xl flex items-center justify-center">
-                            <IconComponent className={`w-6 h-6 ${info.color}`} />
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-black mb-1">{info.title}</h4>
-                          {info.details.map((detail, idx) => {
-                              if (info.title === 'Phone Number') {
-                                return (
-                                  <a key={idx} href={`tel:${detail.replace(/\s+/g, '')}`} className="text-blue-600 hover:text-blue-800 text-sm block">
-                                    {detail}
-                                  </a>
-                                )
-                              }
-                              return info.href ? (
-                                <a key={idx} href={info.href} className="text-blue-600 hover:text-blue-800 text-sm block">
-                                  {detail}
-                                </a>
-                              ) : (
-                                <p key={idx} className="text-gray-600 text-sm">{detail}</p>
-                              )
-                            })}
+              {/* Contact Info */}
+              <div className="space-y-8 md:space-y-12 mt-8 md:mt-0">
+                <div>
+                  <span className="text-[#FFD700] text-xs md:text-sm tracking-widest uppercase mb-3 md:mb-4 block">Contact Details</span>
+                  <h2 className="text-2xl md:text-4xl font-light text-[#333BF5] mb-8 md:mb-12">
+                    Get in Touch
+                    <span className="block font-semibold mt-1 md:mt-2">With Our Team</span>
+                  </h2>
+                </div>
 
-                        </div>
+                <div className="space-y-6 md:space-y-8">
+                  <div className="flex items-start space-x-3 md:space-x-6 group cursor-pointer" onClick={() => window.location = 'tel:+971559821924'}>
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-[#333BF5]/10 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#333BF5] transition-all duration-300">
+                      <svg className="w-5 h-5 md:w-6 md:h-6 text-[#333BF5] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm text-[#333BF5]/40 mb-1">Call Our Team</p>
+                      <p className="text-base md:text-xl text-[#333BF5] font-medium">055 982 1924</p>
+                      <p className="text-sm md:text-lg text-[#333BF5]/80">050 566 8081</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 md:space-x-6 group cursor-pointer" onClick={() => window.location = 'mailto:a.medjoum@gmail.com'}>
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-[#FFD700]/10 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#FFD700] transition-all duration-300">
+                      <svg className="w-5 h-5 md:w-6 md:h-6 text-[#FFD700] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm text-[#333BF5]/40 mb-1">Email Us</p>
+                      <p className="text-base md:text-xl text-[#333BF5] font-medium">a.medjoum@gmail.com</p>
+                      <p className="text-sm md:text-lg text-[#333BF5]/80">mendjouma@gmail.com</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 md:space-x-6">
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-[#333BF5]/10 rounded-xl md:rounded-2xl flex items-center justify-center">
+                      <svg className="w-5 h-5 md:w-6 md:h-6 text-[#333BF5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm text-[#333BF5]/40 mb-1">Visit Our Office</p>
+                      <p className="text-base md:text-xl text-[#333BF5] font-medium">Iris Tower</p>
+                      <p className="text-sm md:text-lg text-[#333BF5]/80">Business Bay, Dubai</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Management Team */}
+                <div className="bg-[#F6F3F0] p-6 md:p-8 rounded-xl md:rounded-2xl">
+                  <h3 className="text-lg md:text-xl font-semibold text-[#333BF5] mb-4 md:mb-6">Management Team</h3>
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-[#FFD700] rounded-lg flex items-center justify-center">
+                        <span className="text-white font-semibold text-xs md:text-sm">AM</span>
                       </div>
-                    );
-                  })}
+                      <div>
+                        <p className="text-sm md:text-base font-medium text-[#333BF5]">Ahmed Medjoum</p>
+                        <p className="text-xs md:text-sm text-[#333BF5]/60">General Manager</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-[#333BF5] rounded-lg flex items-center justify-center">
+                        <span className="text-white font-semibold text-xs md:text-sm">KM</span>
+                      </div>
+                      <div>
+                        <p className="text-sm md:text-base font-medium text-[#333BF5]">Karim Medjoum</p>
+                        <p className="text-xs md:text-sm text-[#333BF5]/60">Operations Director</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Hours */}
+                <div className="border-l-4 border-[#FFD700] pl-4 md:pl-6">
+                  <h3 className="text-base md:text-lg font-semibold text-[#333BF5] mb-2">Business Hours</h3>
+                  <p className="text-xs md:text-sm text-[#333BF5]/70">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                  <p className="text-xs md:text-sm text-[#333BF5]/70">Saturday: 10:00 AM - 2:00 PM</p>
+                  <p className="text-xs md:text-sm text-[#333BF5]/70">Sunday: Closed</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-16">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-black mb-4">Why Choose Wavescation?</h2>
-              <p className="text-gray-600 max-w-3xl mx-auto">
-                Dubai's most trusted holiday home management company, specializing in premium short-term rentals in Downtown Dubai, JBR, Palm Jumeirah and other high-demand locations.
-              </p>
+          {/* Why Choose Us Section */}
+          <div className="bg-[#F6F3F0] rounded-2xl md:rounded-3xl p-6 md:p-12 mb-16 md:mb-24">
+            <div className="text-center mb-8 md:mb-12">
+              <span className="text-[#FFD700] text-xs md:text-sm tracking-widest uppercase mb-3 md:mb-4 block">Why Partner With Us</span>
+              <h2 className="text-2xl md:text-4xl font-light text-[#333BF5] mb-4 md:mb-6">Hotel Management Excellence</h2>
+              <div className="w-20 md:w-24 h-1 bg-[#333BF5] mx-auto"></div>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service, index) => (
-                <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700 font-medium">{service}</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+              {[
+                { number: '15+', label: 'Years Experience' },
+                { number: '25+', label: 'Properties Managed' },
+                { number: '100%', label: 'Client Satisfaction' },
+                { number: '24/7', label: 'Support Available' }
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-2xl md:text-4xl font-bold text-[#333BF5] mb-1 md:mb-2">{stat.number}</div>
+                  <p className="text-xs md:text-sm text-[#333BF5]/60">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
-
-          <div style={{ background: 'rgb(247, 219, 190)' }} className="text-gray-800 rounded-2xl p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-              Join the WavesGlobal Group family and experience hassle-free property management with guaranteed minimum returns and exceptional guest experiences.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+971522596860" className="bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
-              <Phone className="w-5 h-5" /> Call Us Now
-            </a>
-            <a href="tel:+971555175056" className="bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
-              <Phone className="w-5 h-5" /> Call Us Now
-            </a>
-            <a href="https://www.wavescation.com" target="_blank" rel="noopener noreferrer" className="border border-gray-700 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-white hover:text-gray-800 transition-colors">
-              Visit Our Website
-            </a>
-          </div>
-
-          </div>
-
         </div>
       </div>
-      <div className="fixed right-4 bottom-20 flex flex-col gap-4 z-50">
-        <a
-          href="https://wa.me/971522596860"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-            alt="WhatsApp"
-            className="h-10 w-10"
-          />
-        </a>
-        <a
-          href="mailto:Info@wavescation.com"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png"
-            alt="Mail"
-            className="h-10 w-10"
-          />
-        </a>
-        <a
-          href="tel:+971522596860"
-          className="animate-pulse bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
-        >
-          <svg className="h-10 w-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-          </svg>
-        </a>
-      </div>
+      
       <Footer />
     </div>
   );
-};
-
-export default ContactPage;
+}

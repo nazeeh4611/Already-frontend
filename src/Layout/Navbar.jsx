@@ -98,7 +98,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: "Home", icon: <Home className="w-4 h-4" />, path: "/" },
-    { name: "Properties", icon: <Building2 className="w-4 h-4" />, path: "/properties" },
+    { name: "Properties", icon: <Building2 className="w-4 h-4" />, path: "/property" },
     { name: "About", icon: <Info className="w-4 h-4" />, path: "/about" },
     { name: "Contact", icon: <Phone className="w-4 h-4" />, path: "/contact" }
   ];

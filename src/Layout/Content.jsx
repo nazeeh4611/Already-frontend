@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   MapPin, Star, ChevronDown, Phone, Mail, ArrowRight, Heart,
   TrendingUp, CheckCircle, Headphones, Hotel, Users, Building,
-  Globe, Gem, Quote, Briefcase, Gift, Shield
+  Globe, Gem, Quote, Briefcase, Gift, Shield, Award, Clock,
+  Coffee, Wifi, Dumbbell, Car, Plane, Camera, ThumbsUp
 } from 'lucide-react';
 import Airbnb from "../assets/Airbnb.png";
 import Booking from "../assets/Booking.png";
@@ -13,30 +14,35 @@ import Agoda from "../assets/Agoda.png";
 import { useNavigate } from 'react-router-dom';
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const SectionLabel = ({ children, light = false }) => (
-  <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full border"
+  <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full border"
     style={{
       background: light ? 'rgba(255,255,255,0.15)' : '#eff6ff',
       borderColor: light ? 'rgba(255,255,255,0.25)' : '#bfdbfe',
       fontFamily: "'Plus Jakarta Sans', sans-serif"
     }}>
     <span className={`w-1.5 h-1.5 rounded-full ${light ? 'bg-yellow-400' : 'bg-blue-500'}`} />
-    <span className={`text-xs font-semibold uppercase tracking-widest ${light ? 'text-yellow-200' : 'text-blue-600'}`}>{children}</span>
+    <span className={`text-xs font-bold uppercase tracking-widest ${light ? 'text-yellow-200' : 'text-blue-600'}`}>{children}</span>
   </div>
 );
 
 const SectionTitle = ({ children, highlight, light = false }) => (
-  <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 ${light ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Sora', sans-serif" }}>
+  <h2 className={`text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 ${light ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Sora', sans-serif" }}>
     {children}{' '}
-    {highlight && <span style={{ color: light ? '#fcd34d' : '#1d4ed8' }}>{highlight}</span>}
+    <span style={{ color: light ? '#fcd34d' : '#1d4ed8' }} className="relative inline-block">
+      {highlight}
+      <span className="absolute -bottom-2 left-0 w-full h-1 bg-current opacity-30 rounded-full"></span>
+    </span>
   </h2>
 );
 
 const ContentSections = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [activeTab, setActiveTab] = useState('featured');
   const [featuredHotels] = useState([
     { id:1, name:"Royal Suite Burj View", location:"Downtown Dubai", price:1200, rating:5.0, reviews:156, image:"https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Infinity Pool","Spa","Butler","Fine Dining"] },
     { id:2, name:"Palm Jumeirah Palace", location:"Palm Jumeirah", price:2500, rating:5.0, reviews:89, image:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Private Beach","Yacht","Helipad","Royal Spa"] },
@@ -55,25 +61,147 @@ const ContentSections = () => {
   const locationCardsRef = useRef([]);
   const reviewCardsRef = useRef([]);
   const servicesRef = useRef([]);
+  const statsRef = useRef([]);
+  const titleRefs = useRef([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      sectionsRef.current.forEach((s) => {
-        if (s) gsap.fromTo(s, { y: 50, opacity: 0 }, { y:0, opacity:1, duration:1, scrollTrigger:{ trigger:s, start:"top 88%", toggleActions:"play none none reverse" } });
+      sectionsRef.current.forEach((section, index) => {
+        if (section) {
+          const titles = section.querySelectorAll('.section-title');
+          const splitTitles = Array.from(titles).map(title => new SplitText(title, { type: "chars", charsClass: "char" }));
+          
+          gsap.fromTo(section,
+            { y: 50, opacity: 0 },
+            { 
+              y: 0, 
+              opacity: 1, 
+              duration: 1,
+              scrollTrigger: { 
+                trigger: section, 
+                start: "top 85%", 
+                toggleActions: "play none none reverse" 
+              }
+            }
+          );
+
+          splitTitles.forEach(split => {
+            gsap.fromTo(split.chars,
+              { y: 40, opacity: 0, rotateX: -45 },
+              {
+                y: 0,
+                opacity: 1,
+                rotateX: 0,
+                duration: 0.8,
+                stagger: 0.02,
+                ease: "back.out(1.2)",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top 80%"
+                }
+              }
+            );
+          });
+        }
       });
+
       if (partnersRef.current) {
-        gsap.fromTo(partnersRef.current.children, { scale:0.85, opacity:0 }, { scale:1, opacity:1, duration:0.7, stagger:0.08, ease:"back.out(1.5)", scrollTrigger:{ trigger:partnersRef.current, start:"top 88%" } });
+        gsap.fromTo(partnersRef.current.children,
+          { scale: 0.8, opacity: 0, rotation: -5 },
+          { 
+            scale: 1, 
+            opacity: 1, 
+            rotation: 0,
+            duration: 0.8, 
+            stagger: 0.1, 
+            ease: "back.out(1.5)",
+            scrollTrigger: { 
+              trigger: partnersRef.current, 
+              start: "top 85%" 
+            }
+          }
+        );
       }
-      locationCardsRef.current.forEach((c, i) => {
-        if (c) gsap.fromTo(c, { y:30, opacity:0 }, { y:0, opacity:1, duration:0.7, delay:i*0.08, ease:"power2.out", scrollTrigger:{ trigger:c, start:"top 92%" } });
+
+      locationCardsRef.current.forEach((card, i) => {
+        if (card) {
+          gsap.fromTo(card,
+            { y: 40, opacity: 0, scale: 0.95 },
+            { 
+              y: 0, 
+              opacity: 1, 
+              scale: 1,
+              duration: 0.8, 
+              delay: i * 0.08, 
+              ease: "back.out(1.2)",
+              scrollTrigger: { 
+                trigger: card, 
+                start: "top 90%" 
+              }
+            }
+          );
+        }
       });
-      reviewCardsRef.current.forEach((c, i) => {
-        if (c) gsap.fromTo(c, { x: i%2===0?-40:40, opacity:0 }, { x:0, opacity:1, duration:0.9, scrollTrigger:{ trigger:c, start:"top 88%" } });
+
+      reviewCardsRef.current.forEach((card, i) => {
+        if (card) {
+          gsap.fromTo(card,
+            { x: i % 2 === 0 ? -50 : 50, opacity: 0, rotation: i % 2 === 0 ? -2 : 2 },
+            { 
+              x: 0, 
+              opacity: 1, 
+              rotation: 0,
+              duration: 1, 
+              ease: "power3.out",
+              scrollTrigger: { 
+                trigger: card, 
+                start: "top 85%" 
+              }
+            }
+          );
+        }
       });
-      servicesRef.current.forEach((c, i) => {
-        if (c) gsap.fromTo(c, { y:30, opacity:0 }, { y:0, opacity:1, duration:0.6, delay:i*0.08, scrollTrigger:{ trigger:c, start:"top 92%" } });
+
+      servicesRef.current.forEach((service, i) => {
+        if (service) {
+          gsap.fromTo(service,
+            { y: 40, opacity: 0, scale: 0.95 },
+            { 
+              y: 0, 
+              opacity: 1, 
+              scale: 1,
+              duration: 0.7, 
+              delay: i * 0.08, 
+              ease: "back.out(1.2)",
+              scrollTrigger: { 
+                trigger: service, 
+                start: "top 90%" 
+              }
+            }
+          );
+        }
+      });
+
+      statsRef.current.forEach((stat, i) => {
+        if (stat) {
+          gsap.fromTo(stat,
+            { scale: 0.5, opacity: 0 },
+            { 
+              scale: 1, 
+              opacity: 1, 
+              duration: 0.8, 
+              delay: i * 0.15,
+              ease: "elastic.out(1, 0.5)",
+              scrollTrigger: { 
+                trigger: stat, 
+                start: "top 85%" 
+              }
+            }
+          );
+        }
       });
     });
+
     return () => ctx.revert();
   }, []);
 
@@ -97,6 +225,13 @@ const ContentSections = () => {
     { icon:<Briefcase className="h-7 w-7" />, title:'Marketing Strategy', desc:'Multi-channel distribution & branding', features:['Digital Marketing','Brand Building','Partnerships'] },
     { icon:<Users className="h-7 w-7" />, title:'Staff Training', desc:'Professional hospitality programs', features:['Workshops','Certification','Development'] },
     { icon:<Gift className="h-7 w-7" />, title:'Guest Experiences', desc:'Creating memorable stays & events', features:['Events','Concierge','Special Packages'] },
+  ];
+
+  const stats = [
+    { value: '500+', label: 'Properties', icon: <Hotel className="h-6 w-6" /> },
+    { value: '15K+', label: 'Happy Guests', icon: <Users className="h-6 w-6" /> },
+    { value: '4.9', label: 'Avg Rating', icon: <Star className="h-6 w-6" /> },
+    { value: '24/7', label: 'Support', icon: <Clock className="h-6 w-6" /> },
   ];
 
   const faqs = [
@@ -123,81 +258,111 @@ const ContentSections = () => {
     { name:'Emirates Hills', properties:12, image:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
   ];
 
-  const HotelCard = ({ hotel, featured = false }) => (
-    <div onClick={() => navigate(`/property/${hotel.id}`)} className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
-      <div className="relative overflow-hidden h-48">
-        <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        {featured && (
-          <div className="absolute top-3 left-3 px-2.5 py-1 text-xs font-bold text-white rounded-lg" style={{ background: '#f59e0b' }}>Featured</div>
-        )}
-        <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <Heart className="h-4 w-4 text-blue-600" />
-        </button>
-      </div>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-1 flex-1 mr-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{hotel.name}</h3>
-          <div className="flex items-center gap-1 shrink-0 bg-blue-50 px-2 py-0.5 rounded-lg">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-bold text-gray-800">{hotel.rating}</span>
+  const amenities = [
+    { icon: <Wifi className="h-5 w-5" />, label: 'Free WiFi' },
+    { icon: <Coffee className="h-5 w-5" />, label: 'Breakfast' },
+    { icon: <Dumbbell className="h-5 w-5" />, label: 'Fitness Center' },
+    { icon: <Car className="h-5 w-5" />, label: 'Parking' },
+    { icon: <Plane className="h-5 w-5" />, label: 'Airport Transfer' },
+    { icon: <Camera className="h-5 w-5" />, label: 'City Views' },
+  ];
+
+  const HotelCard = ({ hotel, featured = false }) => {
+    const cardRef = useRef(null);
+    
+    useEffect(() => {
+      if (cardRef.current) {
+        gsap.fromTo(cardRef.current,
+          { y: 30, opacity: 0 },
+          { 
+            y: 0, 
+            opacity: 1, 
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: cardRef.current,
+              start: "top 90%"
+            }
+          }
+        );
+      }
+    }, []);
+
+    return (
+      <div ref={cardRef} onClick={() => navigate(`/property/${hotel.id}`)} className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100">
+        <div className="relative overflow-hidden h-48">
+          <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {featured && (
+            <div className="absolute top-3 left-3 px-3 py-1 text-xs font-bold text-white rounded-lg" style={{ background: '#f59e0b' }}>Featured</div>
+          )}
+          <button className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
+            <Heart className="h-4 w-4 text-blue-600" />
+          </button>
+          <div className="absolute bottom-3 left-3 right-3 flex gap-1">
+            {hotel.amenities.slice(0,3).map((a, i) => (
+              <span key={i} className="text-[10px] font-bold bg-white/90 backdrop-blur text-gray-800 px-2 py-1 rounded-full">{a}</span>
+            ))}
           </div>
         </div>
-        <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
-          <MapPin className="h-3 w-3 text-blue-400" />{hotel.location}
-        </p>
-        <div className="flex gap-1 flex-wrap mb-3">
-          {hotel.amenities.slice(0,3).map((a, i) => (
-            <span key={i} className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{a}</span>
-          ))}
-        </div>
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-          <div>
-            <span className="text-lg font-extrabold text-gray-900" style={{ fontFamily: "'Sora', sans-serif" }}>${hotel.price}</span>
-            <span className="text-xs text-gray-400 ml-1">/night</span>
+        <div className="p-5">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-bold text-gray-900 text-base line-clamp-1 flex-1 mr-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{hotel.name}</h3>
+            <div className="flex items-center gap-1 shrink-0 bg-blue-50 px-2 py-1 rounded-lg">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs font-bold text-gray-800">{hotel.rating}</span>
+            </div>
           </div>
-          <span className="text-xs text-gray-400">{hotel.reviews} reviews</span>
+          <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+            <MapPin className="h-3 w-3 text-blue-400" />{hotel.location}
+          </p>
+          <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+            <div>
+              <span className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "'Sora', sans-serif" }}>${hotel.price}</span>
+              <span className="text-xs text-gray-400 ml-1">/night</span>
+            </div>
+            <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">{hotel.reviews} reviews</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div style={{ background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap');`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap');
+        .char { display: inline-block; }
+      `}</style>
 
-      {/* Contact Info Bar */}
-      {/* <section ref={el => sectionsRef.current[0] = el} className="py-8 px-4 md:px-6 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { icon:<Phone className="h-5 w-5 text-blue-600" />, label:'Call Us', val:'0559821924', href:'tel:0559821924' },
-            { icon:<Phone className="h-5 w-5 text-blue-600" />, label:'Call Us', val:'0505668081', href:'tel:0505668081' },
-            { icon:<Mail className="h-5 w-5 text-blue-600" />, label:'Email', val:'a.medjoum@gmail.com', href:'mailto:a.medjoum@gmail.com' },
-            { icon:<Mail className="h-5 w-5 text-blue-600" />, label:'Email', val:'mendjouma@gmail.com', href:'mailto:mendjouma@gmail.com' },
-          ].map((c, i) => (
-            <a key={i} href={c.href} className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border border-blue-50 hover:shadow-md hover:border-blue-200 transition-all duration-200 group">
-              <div className="w-11 h-11 rounded-xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">{c.icon}</div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider">{c.label}</p>
-                <p className="text-sm font-bold text-gray-800 truncate">{c.val}</p>
+      {/* Stats Section */}
+      <section ref={el => sectionsRef.current[0] = el} className="py-12 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-blue-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, i) => (
+              <div key={i} ref={el => statsRef.current[i] = el} className="text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/20 mb-3 text-yellow-300">
+                  {stat.icon}
+                </div>
+                <div className="text-3xl md:text-4xl font-extrabold text-white mb-1" style={{ fontFamily: "'Sora', sans-serif" }}>{stat.value}</div>
+                <div className="text-sm text-blue-200">{stat.label}</div>
               </div>
-            </a>
-          ))}
+            ))}
+          </div>
         </div>
-      </section> */}
+      </section>
 
       {/* Partners */}
-      <section ref={el => sectionsRef.current[1] = el} className="py-16 md:py-20 px-4 md:px-6 bg-white">
+      <section ref={el => sectionsRef.current[1] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>Our Partners</SectionLabel>
             <SectionTitle highlight="Partners">Trusted Booking</SectionTitle>
             <p className="text-gray-500 max-w-md mx-auto text-sm">Listed on the world's leading booking platforms</p>
           </div>
-          <div ref={partnersRef} className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <div ref={partnersRef} className="grid grid-cols-3 md:grid-cols-6 gap-6">
             {partners.map((p, i) => (
-              <div key={i} className="flex items-center justify-center p-5 bg-gray-50 rounded-2xl hover:bg-blue-50 hover:shadow-md transition-all duration-200 group border border-transparent hover:border-blue-100">
-                <img src={p.logo} alt={p.name} className="h-10 object-contain grayscale group-hover:grayscale-0 transition-all duration-300" loading="lazy" />
+              <div key={i} className="flex items-center justify-center p-6 bg-gray-50 rounded-2xl hover:bg-blue-50 hover:shadow-lg transition-all duration-300 group border border-transparent hover:border-blue-200 hover:scale-105">
+                <img src={p.logo} alt={p.name} className="h-12 object-contain grayscale group-hover:grayscale-0 transition-all duration-300" loading="lazy" />
               </div>
             ))}
           </div>
@@ -205,20 +370,23 @@ const ContentSections = () => {
       </section>
 
       {/* Why Choose Us */}
-      <section ref={el => sectionsRef.current[2] = el} className="py-16 md:py-20 px-4 md:px-6" style={{ background: '#eff6ff' }}>
+      <section ref={el => sectionsRef.current[2] = el} className="py-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>Why Us</SectionLabel>
             <SectionTitle highlight="Alrkn Alraqy">Why Choose</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {whyChooseUs.map((item, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 text-white group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)' }}>
+              <div key={i} className="bg-white p-8 rounded-2xl shadow-lg border border-blue-50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 text-white group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)' }}>
                   {item.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2 text-base" style={{ fontFamily: "'Sora', sans-serif" }}>{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
+                <h3 className="font-bold text-gray-900 mb-3 text-lg" style={{ fontFamily: "'Sora', sans-serif" }}>{item.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <span className="text-xs font-semibold text-blue-600">Learn more →</span>
+                </div>
               </div>
             ))}
           </div>
@@ -226,41 +394,42 @@ const ContentSections = () => {
       </section>
 
       {/* Special Offers */}
-      <section ref={el => sectionsRef.current[3] = el} className="py-16 md:py-20 px-4 md:px-6 bg-white">
+      <section ref={el => sectionsRef.current[3] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>Limited Time</SectionLabel>
             <SectionTitle highlight="Deals">Special</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="relative overflow-hidden rounded-3xl p-8 md:p-10 text-white flex flex-col justify-between min-h-[220px]" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%)' }}>
-              <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
-              <div className="absolute -right-4 top-16 w-24 h-24 rounded-full bg-white/5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="relative overflow-hidden rounded-3xl p-10 text-white flex flex-col justify-between min-h-[280px] group" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%)' }}>
+              <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/10 group-hover:scale-150 transition-transform duration-700" />
+              <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-white/5 group-hover:scale-150 transition-transform duration-700" />
               <div className="relative z-10">
-                <p className="text-blue-200 text-sm font-semibold mb-1 uppercase tracking-wider">Special Offer</p>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-6xl font-extrabold" style={{ fontFamily: "'Sora', sans-serif" }}>50</span>
-                  <span className="text-3xl font-bold">%</span>
-                  <span className="text-2xl font-semibold ml-1">OFF</span>
+                <p className="text-yellow-300 text-sm font-bold mb-2 uppercase tracking-wider">Special Offer</p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-7xl font-extrabold" style={{ fontFamily: "'Sora', sans-serif" }}>50</span>
+                  <span className="text-4xl font-bold">%</span>
+                  <span className="text-3xl font-semibold ml-2">OFF</span>
                 </div>
-                <p className="text-blue-200 mb-6">Select hotel deals across all destinations</p>
-                <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-blue-900 hover:shadow-lg transition-all hover:scale-105" style={{ background: '#f59e0b' }}>
-                  Learn More <ArrowRight className="h-4 w-4" />
+                <p className="text-blue-200 mb-8 text-lg">Select hotel deals across all destinations</p>
+                <button className="inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-sm text-blue-900 hover:shadow-2xl transition-all hover:scale-105 group/btn" style={{ background: '#f59e0b' }}>
+                  Learn More <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-3xl p-8 md:p-10 flex flex-col justify-between min-h-[220px]" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 60%, #fbbf24 100%)' }}>
-              <div className="absolute -left-8 -bottom-8 w-40 h-40 rounded-full bg-white/30" />
+            <div className="relative overflow-hidden rounded-3xl p-10 flex flex-col justify-between min-h-[280px] group" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 60%, #fbbf24 100%)' }}>
+              <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-white/30 group-hover:scale-150 transition-transform duration-700" />
+              <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/20 group-hover:scale-150 transition-transform duration-700" />
               <div className="relative z-10">
-                <p className="text-yellow-700 text-sm font-semibold mb-1 uppercase tracking-wider">Member Exclusive</p>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-bold text-yellow-900">Get</span>
-                  <span className="text-6xl font-extrabold text-yellow-900 mx-2" style={{ fontFamily: "'Sora', sans-serif" }}>20%</span>
-                  <span className="text-2xl font-bold text-yellow-900">OFF!</span>
+                <p className="text-yellow-800 text-sm font-bold mb-2 uppercase tracking-wider">Member Exclusive</p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-7xl font-extrabold text-yellow-900" style={{ fontFamily: "'Sora', sans-serif" }}>20</span>
+                  <span className="text-4xl font-bold text-yellow-900">%</span>
+                  <span className="text-3xl font-bold text-yellow-900 ml-2">OFF!</span>
                 </div>
-                <p className="text-yellow-700 mb-6">Let's explore the world with exclusive member discounts</p>
-                <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-white hover:shadow-lg transition-all hover:scale-105" style={{ background: '#1d4ed8' }}>
-                  Book Now <ArrowRight className="h-4 w-4" />
+                <p className="text-yellow-700 mb-8 text-lg">Let's explore the world with exclusive member discounts</p>
+                <button className="inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-sm text-white hover:shadow-2xl transition-all hover:scale-105 group/btn" style={{ background: '#1d4ed8' }}>
+                  Book Now <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -268,61 +437,78 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Featured Hotels */}
-      <section ref={el => sectionsRef.current[4] = el} className="py-16 md:py-20 px-4 md:px-6" style={{ background: '#f8fafc' }}>
+      {/* Tabs for Hotels */}
+      <section ref={el => sectionsRef.current[4] = el} className="py-20 px-4 md:px-6" style={{ background: '#f8fafc' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
-            <div>
-              <SectionLabel>Top Picks</SectionLabel>
-              <SectionTitle highlight="Hotels">Featured</SectionTitle>
-            </div>
-            <button onClick={() => navigate('/property')} className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 group transition-colors">
-              View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          <div className="text-center mb-12">
+            <SectionLabel>Top Picks</SectionLabel>
+            <SectionTitle highlight="Hotels">Featured</SectionTitle>
+          </div>
+
+          <div className="flex justify-center gap-4 mb-10">
+            <button 
+              onClick={() => setActiveTab('featured')}
+              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'featured' ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-gray-600 hover:bg-blue-50'}`}
+            >
+              Featured Hotels
+            </button>
+            <button 
+              onClick={() => setActiveTab('recommended')}
+              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'recommended' ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-gray-600 hover:bg-blue-50'}`}
+            >
+              Recommended
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredHotels.map(h => <HotelCard key={h.id} hotel={h} featured />)}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {(activeTab === 'featured' ? featuredHotels : recommendedHotels).map(h => (
+              <HotelCard key={h.id} hotel={h} featured={activeTab === 'featured'} />
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <button onClick={() => navigate('/property')} className="inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-sm text-white transition-all hover:shadow-xl hover:scale-105" style={{ background: 'linear-gradient(135deg, #1d4ed8, #1e40af)' }}>
+              View All Properties <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Recommended */}
-      <section ref={el => sectionsRef.current[5] = el} className="py-16 md:py-20 px-4 md:px-6 bg-white">
+      {/* Amenities Bar */}
+      <section className="py-12 px-4 md:px-6 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
-            <div>
-              <SectionLabel>For You</SectionLabel>
-              <SectionTitle highlight="for You">Recommended</SectionTitle>
-            </div>
-            <button onClick={() => navigate('/property')} className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 group transition-colors">
-              See More <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {recommendedHotels.map(h => <HotelCard key={h.id} hotel={h} />)}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+            {amenities.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-gray-600 hover:text-blue-600 transition-colors group">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-all">
+                  {item.icon}
+                </div>
+                <span className="text-sm font-semibold">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Prime Locations */}
-      <section ref={el => sectionsRef.current[6] = el} className="py-16 md:py-20 px-4 md:px-6" style={{ background: '#f8fafc' }}>
+      <section ref={el => sectionsRef.current[5] = el} className="py-20 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>Destinations</SectionLabel>
             <SectionTitle highlight="Locations">Prime</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {destinations.map((d, i) => (
               <div key={i} ref={el => locationCardsRef.current[i] = el}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-all duration-300">
-                <img src={d.image} alt={d.name} className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end">
+                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300">
+                <img src={d.image} alt={d.name} className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/40 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
                   <div>
-                    <h3 className="text-lg font-bold text-white" style={{ fontFamily: "'Sora', sans-serif" }}>{d.name}</h3>
+                    <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "'Sora', sans-serif" }}>{d.name}</h3>
                     <p className="text-blue-200 text-sm">{d.properties} properties</p>
                   </div>
-                  <div className="w-9 h-9 rounded-xl bg-yellow-400 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all">
                     <ArrowRight className="h-4 w-4 text-blue-900" />
                   </div>
                 </div>
@@ -333,25 +519,26 @@ const ContentSections = () => {
       </section>
 
       {/* Services */}
-      <section ref={el => sectionsRef.current[7] = el} className="py-16 md:py-20 px-4 md:px-6 text-white" style={{ background: 'linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)' }}>
+      <section ref={el => sectionsRef.current[6] = el} className="py-20 px-4 md:px-6 text-white" style={{ background: 'linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel light>What We Do</SectionLabel>
             <SectionTitle highlight="Services" light>Our Premium</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((s, i) => (
               <div key={i} ref={el => servicesRef.current[i] = el}
-                className="group bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/15 hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style={{ background: 'rgba(245,158,11,0.25)', border: '1px solid rgba(245,158,11,0.4)' }}>
-                  <span className="text-yellow-300">{s.icon}</span>
+                className="group bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 hover:bg-white/20 hover:-translate-y-2 transition-all duration-300">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform" style={{ background: 'rgba(245,158,11,0.25)', border: '1px solid rgba(245,158,11,0.4)' }}>
+                  <span className="text-yellow-300 text-2xl">{s.icon}</span>
                 </div>
-                <h3 className="font-bold text-white mb-2" style={{ fontFamily: "'Sora', sans-serif" }}>{s.title}</h3>
-                <p className="text-blue-200 text-sm mb-4">{s.desc}</p>
-                <div className="space-y-1.5">
+                <h3 className="font-bold text-white mb-3 text-xl" style={{ fontFamily: "'Sora', sans-serif" }}>{s.title}</h3>
+                <p className="text-blue-200 text-sm mb-5 leading-relaxed">{s.desc}</p>
+                <div className="space-y-2">
                   {s.features.map((f, j) => (
                     <div key={j} className="flex items-center gap-2 text-sm text-blue-100">
-                      <CheckCircle className="h-3.5 w-3.5 text-yellow-400 shrink-0" />{f}
+                      <CheckCircle className="h-4 w-4 text-yellow-400 shrink-0" />
+                      <span>{f}</span>
                     </div>
                   ))}
                 </div>
@@ -362,32 +549,33 @@ const ContentSections = () => {
       </section>
 
       {/* Reviews */}
-      <section ref={el => sectionsRef.current[8] = el} className="py-16 md:py-20 px-4 md:px-6" style={{ background: '#eff6ff' }}>
+      <section ref={el => sectionsRef.current[7] = el} className="py-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>Reviews</SectionLabel>
             <SectionTitle highlight="Testimonials">Guest</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {reviews.map((r, i) => (
               <div key={i} ref={el => reviewCardsRef.current[i] = el}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-blue-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <img src={r.image} alt={r.name} className="w-12 h-12 rounded-xl object-cover border-2 border-blue-100" />
+                className="bg-white rounded-2xl p-8 shadow-lg border border-blue-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex items-center gap-4">
+                    <img src={r.image} alt={r.name} className="w-14 h-14 rounded-xl object-cover border-2 border-blue-200" />
                     <div>
-                      <h4 className="font-bold text-gray-900 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{r.name}</h4>
-                      <p className="text-xs text-gray-400">{r.location}</p>
-                      <div className="flex items-center gap-0.5 mt-1">
-                        {[...Array(r.rating)].map((_, j) => <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />)}
+                      <h4 className="font-bold text-gray-900 text-base" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{r.name}</h4>
+                      <p className="text-xs text-gray-400 mb-1">{r.location}</p>
+                      <div className="flex items-center gap-0.5">
+                        {[...Array(r.rating)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />)}
                       </div>
                     </div>
                   </div>
-                  <Quote className="h-7 w-7 text-blue-200 shrink-0" />
+                  <Quote className="h-8 w-8 text-blue-200 shrink-0" />
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed">"{r.review}"</p>
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                  <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-full">✓ Verified Guest</span>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">"{r.review}"</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">✓ Verified Guest</span>
+                  <ThumbsUp className="h-4 w-4 text-gray-300" />
                 </div>
               </div>
             ))}
@@ -396,31 +584,31 @@ const ContentSections = () => {
       </section>
 
       {/* FAQ */}
-      <section ref={el => sectionsRef.current[9] = el} className="py-16 md:py-20 px-4 md:px-6 bg-white">
+      <section ref={el => sectionsRef.current[8] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>FAQ</SectionLabel>
             <SectionTitle highlight="Questions">Frequently Asked</SectionTitle>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {faqs.map((f, i) => (
-              <div key={i} className="border border-blue-100 rounded-2xl overflow-hidden hover:border-blue-300 transition-colors">
+              <div key={i} className="border border-blue-100 rounded-2xl overflow-hidden hover:border-blue-300 transition-all hover:shadow-lg">
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-blue-50 transition-colors"
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-blue-50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 shrink-0">{i+1}</span>
-                    <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{f.q}</span>
+                  <div className="flex items-center gap-4">
+                    <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-700 shrink-0">{i+1}</span>
+                    <span className="font-bold text-gray-800 text-base" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{f.q}</span>
                   </div>
-                  <div className={`w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 transition-transform duration-300 ${expandedFaq===i?'rotate-180 bg-blue-100':''}`}>
+                  <div className={`w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 transition-all duration-300 ${expandedFaq===i ? 'rotate-180 bg-blue-100 scale-110' : ''}`}>
                     <ChevronDown className="h-4 w-4 text-blue-600" />
                   </div>
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${expandedFaq===i?'max-h-64':'max-h-0'}`}>
-                  <div className="px-6 pb-5 pl-16">
+                <div className={`overflow-hidden transition-all duration-300 ${expandedFaq===i ? 'max-h-64' : 'max-h-0'}`}>
+                  <div className="px-6 pb-6 pl-16">
                     <p className="text-sm text-gray-600 leading-relaxed bg-blue-50 rounded-xl p-4">{f.a}</p>
-                    <span className="text-[11px] text-blue-500 font-semibold mt-2 block">Category: {f.category}</span>
+                    <span className="text-xs font-bold text-blue-600 mt-3 block">Category: {f.category}</span>
                   </div>
                 </div>
               </div>
@@ -429,44 +617,62 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Vision & Mission — LAST */}
-      <section ref={el => sectionsRef.current[10] = el} className="py-16 md:py-20 px-4 md:px-6" style={{ background: '#f8fafc' }}>
+      {/* Vision & Mission */}
+      <section ref={el => sectionsRef.current[9] = el} className="py-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <SectionLabel>About Us</SectionLabel>
             <SectionTitle highlight="Mission">Our Vision &</SectionTitle>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 rounded-3xl overflow-hidden shadow-xl">
-            <div className="p-10 md:p-14 text-white" style={{ background: 'linear-gradient(135deg, #1e3a8a, #1d4ed8)' }}>
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-                <Globe className="h-6 w-6 text-yellow-300" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="p-12 text-white" style={{ background: 'linear-gradient(135deg, #1e3a8a, #1d4ed8)' }}>
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <Globe className="h-8 w-8 text-yellow-300" />
               </div>
               <h2 className="text-3xl font-extrabold mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>Our Vision</h2>
-              <p className="text-blue-100 leading-relaxed mb-8">To be a leading hospitality management company in the Middle East and beyond, setting benchmarks in quality, service, and innovation.</p>
-              <div className="flex items-center gap-3">
+              <p className="text-blue-100 leading-relaxed text-lg mb-8">To be a leading hospitality management company in the Middle East and beyond, setting benchmarks in quality, service, and innovation.</p>
+              <div className="flex items-center gap-4">
                 <div className="flex -space-x-2">
-                  {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-blue-400/40 border-2 border-white/40" />)}
+                  {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full bg-blue-400/40 border-2 border-white/40" />)}
                 </div>
                 <span className="text-sm text-blue-200">Trusted globally</span>
               </div>
             </div>
-            <div className="p-10 md:p-14 bg-white">
-              <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center mb-6">
-                <CheckCircle className="h-6 w-6 text-yellow-500" />
+            <div className="p-12 bg-white">
+              <div className="w-16 h-16 rounded-2xl bg-yellow-50 flex items-center justify-center mb-8">
+                <Award className="h-8 w-8 text-yellow-500" />
               </div>
               <h2 className="text-3xl font-extrabold text-gray-900 mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>Our Mission</h2>
-              <p className="text-gray-600 leading-relaxed mb-8">To elevate hospitality experiences through expert hotel management services that drive operational excellence, maximize profitability, and deliver outstanding guest satisfaction.</p>
+              <p className="text-gray-600 leading-relaxed text-lg mb-8">To elevate hospitality experiences through expert hotel management services that drive operational excellence, maximize profitability, and deliver outstanding guest satisfaction.</p>
               <div className="grid grid-cols-2 gap-3">
                 {['Excellence','Innovation','Partnership','Growth'].map(v => (
                   <div key={v} className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
-                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                      <CheckCircle className="h-3.5 w-3.5 text-blue-600" />
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">{v}</span>
+                    <span className="text-sm font-bold text-gray-700">{v}</span>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-16 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-blue-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-extrabold text-white mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>Get Exclusive Deals</h2>
+          <p className="text-blue-200 mb-8">Subscribe to our newsletter and receive special offers directly in your inbox</p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Your email address" 
+              className="flex-1 px-6 py-4 rounded-xl border-2 border-white/30 bg-white/20 text-white placeholder-blue-200 focus:outline-none focus:border-yellow-400 transition-all"
+            />
+            <button className="px-8 py-4 rounded-xl font-bold text-blue-900 bg-yellow-400 hover:bg-yellow-300 transition-all hover:scale-105 active:scale-95">
+              Subscribe
+            </button>
           </div>
         </div>
       </section>

@@ -1,9 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 
 const OtpModal = ({ show, onClose, email }) => {
   const [otp, setOtp] = useState("");
   const [timeLeft, setTimeLeft] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  useEffect(() => {
+    if (show && modalRef.current && overlayRef.current) {
+      gsap.fromTo(overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
+      );
+      gsap.fromTo(modalRef.current,
+        { scale: 0.8, opacity: 0, y: 50 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }
+      );
+    }
+  }, [show]);
 
   useEffect(() => {
     if (show) {
@@ -49,7 +65,16 @@ const OtpModal = ({ show, onClose, email }) => {
         throw new Error(data.message || "OTP verification failed");
       }
 
-      window.location.href = "/";
+      gsap.to(modalRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        y: 50,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          window.location.href = "/";
+        }
+      });
     } catch (error) {
       alert(error.message || "OTP verification failed");
     }
@@ -73,103 +98,139 @@ const OtpModal = ({ show, onClose, email }) => {
       
       setTimeLeft(60);
       setCanResend(false);
+      
+      gsap.fromTo(".resend-message",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+      );
     } catch (error) {
       alert("Failed to resend OTP");
       console.error(error);
     }
   };
 
+  const handleClose = () => {
+    gsap.to(modalRef.current, {
+      scale: 0.8,
+      opacity: 0,
+      y: 50,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: onClose
+    });
+    gsap.to(overlayRef.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in"
+    });
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl border border-gray-100">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+      <div ref={overlayRef} className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={handleClose} />
+      <div ref={modalRef} className="relative bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md border border-blue-100">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap');
+          .otp-input {
+            font-family: 'Sora', sans-serif;
+            letter-spacing: 0.5em;
+          }
+        `}</style>
         
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: 'rgb(247, 247, 247)' }}>
-            <svg className="w-8 h-8" style={{ color: 'rgb(230, 116, 19)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <button 
+          onClick={handleClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all hover:scale-110"
+        >
+          <span className="text-lg">×</span>
+        </button>
+        
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" 
+            style={{ background: 'linear-gradient(135deg, #f59e0b20, #f59e0b40)' }}>
+            <svg className="w-8 h-8" style={{ color: '#f59e0b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-black mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: "'Sora', sans-serif" }}>
             Verify Your Email
           </h2>
-          <p className="text-gray-600 text-sm leading-relaxed">
-            We've sent a 6-digit verification code to<br/>
-            <span className="font-semibold" style={{ color: 'rgb(230, 116, 19)' }}>{email}</span>
+          <p className="text-gray-500 text-sm leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            We've sent a 6-digit verification code to
           </p>
-          
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all duration-200"
-          >
-            ×
-          </button>
+          <p className="font-semibold text-base mt-1" style={{ color: '#f59e0b', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            {email}
+          </p>
         </div>
         
-        <div className="space-y-6">
-          {/* OTP Input */}
+        <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-black mb-4 text-center">Enter Verification Code</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-2 text-center uppercase tracking-wider">
+              Enter Verification Code
+            </label>
             <input
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').substring(0, 6))}
-              className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-black placeholder-gray-400 text-center text-xl tracking-widest font-bold"
-              style={{ backgroundColor: 'rgb(247, 247, 247)' }}
+              className="otp-input w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100 transition-all duration-200 text-gray-800 placeholder-gray-300 text-center text-2xl font-bold"
               placeholder="000000"
               maxLength={6}
             />
           </div>
           
-          {/* Timer */}
           <div className="text-center">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-gray-200" style={{ backgroundColor: 'rgb(248, 252, 255)' }}>
-              <svg className="w-4 h-4" style={{ color: 'rgb(230, 116, 19)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 border border-orange-100">
+              <svg className="w-4 h-4" style={{ color: '#f59e0b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-gray-600 text-sm font-medium">
-                Time remaining: <span className="font-bold" style={{ color: 'rgb(230, 116, 19)' }}>{formatTime(timeLeft)}</span>
+                Time remaining: <span className="font-bold" style={{ color: '#f59e0b' }}>{formatTime(timeLeft)}</span>
               </span>
             </div>
           </div>
           
-          {/* Verify Button */}
           <button
             onClick={handleVerify}
             disabled={otp.length !== 6}
-            className="w-full py-4 text-white rounded-full font-semibold transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-400 text-lg tracking-wide"
+            className="w-full py-4 text-white rounded-xl font-bold text-sm transition-all duration-200 transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style={{ 
-              backgroundColor: otp.length === 6 ? 'rgb(230, 116, 19)' : 'rgb(156, 163, 175)' 
+              background: otp.length === 6 
+                ? 'linear-gradient(135deg, #f59e0b, #d97706)' 
+                : 'linear-gradient(135deg, #9ca3af, #6b7280)'
             }}
           >
             {otp.length === 6 ? 'Verify Code' : `Enter ${6 - otp.length} more digits`}
           </button>
           
-          {/* Resend Button */}
-          <div className="text-center">
-            <p className="text-gray-500 text-sm mb-3">Didn't receive the code?</p>
+          <div className="text-center space-y-2">
+            <p className="text-gray-400 text-xs">Didn't receive the code?</p>
             <button
               onClick={handleResend}
               disabled={!canResend}
-              className="font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:underline text-base"
-              style={{ 
-                color: canResend ? 'rgb(230, 116, 19)' : 'rgb(107, 114, 128)' 
-              }}
+              className="font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 inline-flex items-center gap-1"
+              style={{ color: canResend ? '#f59e0b' : '#9ca3af' }}
             >
-              {canResend ? 'Resend Code' : `Resend in ${formatTime(timeLeft)}`}
+              {canResend ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Resend Code
+                </>
+              ) : (
+                `Resend in ${formatTime(timeLeft)}`
+              )}
             </button>
           </div>
         </div>
 
-        {/* Help Text */}
-        <div className="mt-8 p-4 rounded-xl border border-gray-200" style={{ backgroundColor: 'rgb(248, 252, 255)' }}>
-          <div className="flex items-start space-x-3">
+        <div className="mt-6 p-4 rounded-xl bg-blue-50 border border-blue-100">
+          <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-black text-sm font-medium mb-1">Having trouble?</p>
-              <p className="text-gray-600 text-xs leading-relaxed">
+              <p className="text-gray-800 text-xs font-medium mb-1">Having trouble?</p>
+              <p className="text-gray-500 text-xs leading-relaxed">
                 Check your spam folder or ensure your email address is correct. The code expires in 10 minutes.
               </p>
             </div>
