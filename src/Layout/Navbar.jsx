@@ -132,12 +132,11 @@ const Navbar = () => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div ref={logoRef} className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
-              {/* <img
-                src={logo}
+              <img
+                src="/logo.png"
                 alt="Alrkn Alraqy"
                 className="h-14 md:h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              /> */}
-              <h1>Alkrin Alraqy LOGO</h1>
+              />
             </div>
 
             {/* Desktop Nav */}

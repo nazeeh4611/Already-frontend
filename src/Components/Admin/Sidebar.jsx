@@ -44,11 +44,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, handleSidebarClick })
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
       <div className="flex items-center gap-3">
         <img
-          src="https://www.wavescation.com/assets/logo-DC0iQ2p5.png"
-          alt="Wavescation Logo"
-          className="w-14 h-14 object-contain"
+          src="/logo.png"
+          alt="Alrkn Alraqy Hotel Management Logo"
+          className="w-44 h-44 object-contain"
         />
-        <span className="text-lg font-semibold text-gray-900 tracking-tight">Wavescation</span>
       </div>
 
         <button

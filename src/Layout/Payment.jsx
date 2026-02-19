@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { ArrowRight, ArrowLeft, CreditCard, Check, Shield, AlertTriangle, Loader2, Building } from 'lucide-react';
+import { ArrowRight, ArrowLeft, CreditCard, Check, Shield, AlertTriangle, Loader2, Building, Lock, Clock, Award } from 'lucide-react';
 import { baseurl } from '../Base/Base';
 
 const CheckoutPayment = ({ 
@@ -22,7 +22,6 @@ const CheckoutPayment = ({
   const scriptRef = useRef(null);
   const widgetInitialized = useRef(false);
 
-  // Store booking info
   useEffect(() => {
     if (bookingDetails.bookingId) {
       sessionStorage.setItem('currentBookingId', bookingDetails.bookingId);
@@ -30,15 +29,12 @@ const CheckoutPayment = ({
     }
   }, [bookingDetails.bookingId]);
 
-  // Handle success redirect from PaymentReturn
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const paymentSuccess = urlParams.get('paymentSuccess');
     
     if (paymentSuccess === 'true') {
-      console.log('✅ Payment successful, proceeding to completion');
       window.history.replaceState({}, '', window.location.pathname);
-      
       if (onPaymentSuccess) {
         onPaymentSuccess(bookingDetails);
       } else {
@@ -47,7 +43,6 @@ const CheckoutPayment = ({
     }
   }, []);
 
-  // Load widget when checkoutId is ready
   useEffect(() => {
     if (showPaymentWidget && checkoutId && !widgetInitialized.current) {
       widgetInitialized.current = true;
@@ -61,24 +56,21 @@ const CheckoutPayment = ({
     };
   }, [showPaymentWidget, checkoutId]);
 
-  // Handle widget expiration with auto-refresh
   useEffect(() => {
     if (widgetLoaded && checkoutId) {
       const warningTimer = setTimeout(() => {
         setError('⚠️ Payment session expires in 5 minutes! Please complete payment soon.');
-      }, 25 * 60 * 1000); // Warning at 25 minutes
+      }, 25 * 60 * 1000);
 
       const refreshTimer = setTimeout(() => {
-        console.log('🔄 Checkout expired, refreshing...');
         setError('Payment session expired. Refreshing automatically...');
         setWidgetLoaded(false);
         widgetInitialized.current = false;
         cleanupWidget();
-        
         setTimeout(() => {
           handleOnlinePayment();
         }, 2000);
-      }, 28 * 60 * 1000); // Refresh at 28 minutes
+      }, 28 * 60 * 1000);
 
       return () => {
         clearTimeout(warningTimer);
@@ -97,14 +89,12 @@ const CheckoutPayment = ({
   };
 
   const loadPaymentWidget = () => {
-    console.log('🚀 Loading payment widget for checkoutId:', checkoutId);
     cleanupWidget();
     
     if (paymentFormRef.current) {
       paymentFormRef.current.innerHTML = '';
     }
   
-    // Create form that AFS widget will populate
     const form = document.createElement('form');
     form.action = `${window.location.origin}/payment-return`;
     form.className = 'paymentWidgets';
@@ -114,7 +104,6 @@ const CheckoutPayment = ({
       paymentFormRef.current.appendChild(form);
     }
   
-    // Configure widget options
     window.wpwlOptions = {
       style: "card",
       locale: "en",
@@ -123,33 +112,25 @@ const CheckoutPayment = ({
       brandDetectionPriority: ["VISA", "MASTER", "AMEX"],
       
       onReady: function() {
-        console.log('✅ Payment widget ready');
         setWidgetLoaded(true);
         setError(null);
       },
       
       onError: function(error) {
-        console.error('❌ Widget error:', error);
         setError(`Payment form error: ${error.message || 'Please try again'}`);
         setWidgetLoaded(false);
       }
     };
   
-    // CRITICAL: Use TEST URL - must match backend
     const script = document.createElement('script');
     const afsWidgetUrl = `https://eu-prod.oppwa.com/v1/paymentWidgets.js?checkoutId=${checkoutId}`;
-    
-    console.log('📦 Loading widget from:', afsWidgetUrl);
     
     script.src = afsWidgetUrl;
     script.async = true;
     
-    script.onload = () => {
-      console.log('✅ Payment script loaded successfully');
-    };
+    script.onload = () => {};
   
-    script.onerror = (error) => {
-      console.error('❌ Failed to load payment script:', error);
+    script.onerror = () => {
       setError('Failed to load payment system. Please refresh and try again.');
       setWidgetLoaded(false);
       widgetInitialized.current = false;
@@ -159,7 +140,6 @@ const CheckoutPayment = ({
     scriptRef.current = script;
   };
 
-  // Initialize online payment
   const handleOnlinePayment = async () => {
     if (!bookingDetails.bookingId) {
       setError('Booking ID not generated. Please refresh and try again.');
@@ -173,29 +153,14 @@ const CheckoutPayment = ({
     try {
       const token = localStorage.getItem('authToken');
       
-      console.log('🔄 Initializing payment for booking:', bookingDetails.bookingId);
-      
       const response = await axios.post(
         `${baseurl}user/initialize-afs-payment`,
         { bookingId: bookingDetails.bookingId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 30000
-        }
+        { headers: { Authorization: `Bearer ${token}` }, timeout: 30000 }
       );
 
-      console.log('📥 Payment initialization response:', response.data);
-
       if (response.data.success && response.data.checkoutId) {
-        console.log('✅ Payment initialized with checkoutId:', response.data.checkoutId);
-        
-        if (response.data.reused) {
-          console.log('♻️ Reusing existing checkout session');
-        }
-        
-        // Small delay to ensure state is clean
         await new Promise(resolve => setTimeout(resolve, 500));
-        
         setCheckoutId(response.data.checkoutId);
         setShowPaymentWidget(true);
         sessionStorage.setItem('currentBookingId', bookingDetails.bookingId);
@@ -204,8 +169,6 @@ const CheckoutPayment = ({
         throw new Error(response.data.message || 'Payment initialization failed');
       }
     } catch (err) {
-      console.error('❌ Payment initialization failed:', err);
-      
       if (err.response?.status === 400 && err.response?.data?.expired) {
         setError('Your booking session has expired. Please create a new booking.');
         setTimeout(() => {
@@ -221,7 +184,6 @@ const CheckoutPayment = ({
     }
   };
 
-  // Confirm booking (for pay-at-property)
   const handleConfirmBooking = async () => {
     if (selectedPayment === 'online-payment') {
       await handleOnlinePayment();
@@ -245,9 +207,7 @@ const CheckoutPayment = ({
           bookingId: bookingDetails.bookingId,
           paymentMethod: selectedPayment
         },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
   
       if (response.data.success) {
@@ -260,14 +220,12 @@ const CheckoutPayment = ({
         throw new Error('Booking confirmation failed');
       }
     } catch (err) {
-      console.error('Booking confirmation failed:', err);
       setError(err.response?.data?.message || 'Failed to confirm booking. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Retry widget loading
   const retryWidget = () => {
     setError(null);
     setWidgetLoaded(false);
@@ -278,17 +236,42 @@ const CheckoutPayment = ({
     }, 500);
   };
 
-  // Payment widget view
   if (showPaymentWidget) {
     return (
       <div className="space-y-6 animate-fadeIn">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8 relative">
-          Complete Payment
-          <div className="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
-        </h2>
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center gap-12 relative">
+            <div className="absolute top-5 left-8 right-8 h-0.5 bg-blue-200"></div>
+            <div className="absolute top-5 left-0 w-full h-0.5 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0]"></div>
+            
+            <div className="flex flex-col items-center relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white shadow-lg">
+                <Check className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1846ca]">Details</span>
+            </div>
+            
+            <div className="flex flex-col items-center relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white shadow-lg">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1846ca]">Payment</span>
+            </div>
+            
+            <div className="flex flex-col items-center relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-white border-2 border-blue-200 text-blue-400">
+                <Check className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Complete</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-black text-gray-900 mb-2">Complete Payment</h2>
+        <p className="text-sm text-gray-500 mb-6">Enter your card details to secure your booking</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -297,7 +280,7 @@ const CheckoutPayment = ({
                   <button
                     onClick={retryWidget}
                     disabled={loading}
-                    className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2.5 bg-[#1846ca] text-white rounded-xl text-sm font-semibold hover:bg-[#1234a0] transition-colors disabled:opacity-50"
                   >
                     {loading ? 'Refreshing...' : 'Retry Payment Form'}
                   </button>
@@ -307,83 +290,57 @@ const CheckoutPayment = ({
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-2">Amount to pay:</p>
-            <p className="text-3xl font-bold text-orange-600">
+        <div className="bg-white border-2 border-blue-100 rounded-2xl p-6" style={{ boxShadow: '0 15px 30px rgba(24,70,202,0.08)' }}>
+          <div className="mb-6 pb-6 border-b border-blue-100">
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">Amount to pay</p>
+            <p className="text-4xl font-black text-[#1846ca]">
               AED {bookingDetails.total.toLocaleString()}
             </p>
           </div>
           
-          {/* Payment form container */}
-          <div 
-            ref={paymentFormRef}
-            className="payment-widget-container min-h-[400px]"
-          />
+          <div ref={paymentFormRef} className="payment-widget-container min-h-[400px]" />
 
-          {/* Loading state */}
           {!widgetLoaded && !error && (
             <div className="text-center py-12">
-              <Loader2 className="w-10 h-10 text-orange-500 animate-spin mx-auto mb-4" />
-              <p className="text-gray-700 font-medium mb-2">
-                Loading secure payment form...
-              </p>
-              <p className="text-gray-500 text-sm">
-                This may take a few moments. Please don't refresh the page.
-              </p>
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] flex items-center justify-center animate-pulse">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-gray-700 font-bold mb-2">Loading secure payment form...</p>
+              <p className="text-gray-500 text-sm">This may take a few moments</p>
             </div>
           )}
 
-          {/* Success state */}
           {widgetLoaded && !error && (
             <>
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 text-green-700 mb-2">
-                  <Check className="w-5 h-5" />
-                  <span className="font-medium">Payment form ready</span>
+              <div className="mt-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 text-[#1846ca] mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 mb-1">Secure Payment</p>
+                    <p className="text-sm text-gray-600">Enter your card details above. After payment, you'll be redirected automatically.</p>
+                  </div>
                 </div>
-                <p className="text-green-600 text-sm mb-2">
-                  Enter your card details above and click "Pay". After payment, you'll be redirected automatically.
-                </p>
-                <p className="text-green-700 text-xs font-medium">
-                  ⚠️ Do not close the window during payment processing.
-                </p>
               </div>
 
-              {/* Payment time limit notice */}
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-yellow-800 font-medium mb-1">
-                      Complete payment within 30 minutes
-                    </p>
-                    <p className="text-xs text-yellow-700">
-                      For security, this payment session will expire after 30 minutes. If it expires, we'll automatically refresh the page for you.
-                    </p>
-                  </div>
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <p className="text-xs text-amber-700 font-medium">
+                    Complete payment within 30 minutes. This session will expire automatically.
+                  </p>
                 </div>
               </div>
             </>
           )}
           
-          {/* Security info */}
-          <div className="mt-6 bg-blue-50 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <span className="text-sm font-medium text-blue-800 block mb-1">
-                  Secure Payment
-                </span>
-                <p className="text-xs text-blue-600">
-                  Powered by AFS Payment Gateway. All transactions are encrypted and PCI DSS compliant.
-                </p>
-              </div>
+          <div className="mt-6 pt-6 border-t border-blue-100">
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <Shield className="w-4 h-4 text-[#1846ca]" />
+              <span>256-bit SSL encrypted • PCI DSS compliant</span>
             </div>
           </div>
         </div>
 
-        {/* Back button */}
         <div className="flex justify-between">
           <button
             type="button"
@@ -394,120 +351,115 @@ const CheckoutPayment = ({
               setCheckoutId(null);
               setError(null);
             }}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all"
+            className="flex items-center gap-2 px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Payment Options
+            Back
           </button>
         </div>
       </div>
     );
   }
 
-  // Main payment selection view
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Progress steps */}
-      <div className="flex justify-center mb-12">
-        <div className="flex items-center gap-8 relative">
-          <div className="absolute top-5 left-8 right-8 h-0.5 bg-gray-200"></div>
-          <div className="absolute top-5 left-8 w-full h-0.5 bg-orange-500"></div>
+      <div className="flex justify-center mb-8">
+        <div className="flex items-center gap-12 relative">
+          <div className="absolute top-5 left-8 right-8 h-0.5 bg-blue-200"></div>
+          <div className="absolute top-5 left-8 w-2/3 h-0.5 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0]"></div>
           
-          <div className="flex flex-col items-center relative z-10 text-orange-500">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-orange-500 text-white shadow-lg">
+          <div className="flex flex-col items-center relative z-10">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white shadow-lg">
               <Check className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium">Details</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1846ca]">Details</span>
           </div>
           
-          <div className="flex flex-col items-center relative z-10 text-orange-500">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-orange-500 text-white shadow-lg">
+          <div className="flex flex-col items-center relative z-10">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white shadow-lg">
               <CreditCard className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium">Payment</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1846ca]">Payment</span>
           </div>
           
-          <div className="flex flex-col items-center relative z-10 text-gray-400">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-gray-200">
+          <div className="flex flex-col items-center relative z-10">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2 bg-white border-2 border-blue-200 text-blue-400">
               <Check className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium">Complete</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Complete</span>
           </div>
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-8 relative">
-        Complete Your Booking
-        <div className="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
-      </h2>
+      <h2 className="text-2xl font-black text-gray-900 mb-2">Complete Your Booking</h2>
+      <p className="text-sm text-gray-500 mb-6">Choose your preferred payment method</p>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+            <AlertTriangle className="w-5 h-5 text-red-500" />
             <p className="text-red-700 text-sm">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Booking Summary */}
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Summary</h3>
-        <div className="bg-white rounded-lg p-4 space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">Booking ID:</span>
-            <span className="font-mono text-sm text-gray-900 bg-gray-100 px-2 py-1 rounded">
-              {bookingDetails.bookingId ? bookingDetails.bookingId.substring(0, 8).toUpperCase() : 'Generating...'}
-            </span>
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] flex items-center justify-center">
+            <Award className="w-5 h-5 text-white" />
           </div>
-          
-          <div className="flex justify-between items-center">
+          <div>
+            <p className="font-bold text-gray-900">Booking Summary</p>
+            <p className="text-xs text-gray-500">ID: {bookingDetails.bookingId ? bookingDetails.bookingId.substring(0, 8).toUpperCase() : 'Generating...'}</p>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl p-4 space-y-2">
+          <div className="flex justify-between text-sm">
             <span className="text-gray-600">Property:</span>
-            <span className="font-medium text-gray-900">{bookingDetails.roomType}</span>
+            <span className="font-semibold text-gray-900">{bookingDetails.roomType}</span>
           </div>
-
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between text-sm">
             <span className="text-gray-600">Duration:</span>
-            <span className="font-medium text-gray-900">
-              {bookingDetails.units} {bookingDetails.units === 1 ? 'Night' : 'Nights'}
-            </span>
+            <span className="font-semibold text-gray-900">{bookingDetails.units} {bookingDetails.units === 1 ? 'Night' : 'Nights'}</span>
           </div>
-
-          <div className="border-t pt-3 mt-3">
-            <div className="flex justify-between items-center font-bold text-lg">
-              <span className="text-gray-900">Total Amount:</span>
-              <span className="text-orange-600">AED {bookingDetails.total.toLocaleString()}</span>
+          <div className="border-t pt-2 mt-2">
+            <div className="flex justify-between font-bold">
+              <span className="text-gray-900">Total:</span>
+              <span className="text-[#1846ca]">AED {bookingDetails.total.toLocaleString()}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Method Selection */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
+      <div className="bg-white border-2 border-blue-100 rounded-2xl p-6">
+        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-[#1846ca]" />
+          Payment Method
+        </h3>
         
         <div className="space-y-3">
           <div 
             onClick={() => setSelectedPayment('online-payment')}
-            className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
+            className={`flex items-center p-5 border-2 rounded-xl cursor-pointer transition-all ${
               selectedPayment === 'online-payment' 
-                ? 'border-orange-500 bg-orange-50' 
-                : 'border-gray-200 hover:border-orange-300'
+                ? 'border-[#1846ca] bg-blue-50' 
+                : 'border-blue-100 hover:border-[#1846ca] hover:bg-blue-50/30'
             }`}
           >
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${
+            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 ${
               selectedPayment === 'online-payment'
-                ? 'border-orange-500 bg-orange-500'
+                ? 'border-[#1846ca] bg-[#1846ca]'
                 : 'border-gray-300'
             }`}>
               {selectedPayment === 'online-payment' && <Check className="w-3 h-3 text-white" />}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-orange-600" />
+                <CreditCard className="w-5 h-5 text-[#1846ca]" />
                 <div>
-                  <div className="font-medium text-gray-900">Pay Online</div>
-                  <div className="text-sm text-gray-600">Credit/Debit Card (VISA, MasterCard, AMEX)</div>
+                  <div className="font-bold text-gray-900">Pay Online</div>
+                  <div className="text-xs text-gray-500">Credit/Debit Card (VISA, MasterCard, AMEX)</div>
                 </div>
               </div>
             </div>
@@ -515,25 +467,25 @@ const CheckoutPayment = ({
 
           <div 
             onClick={() => setSelectedPayment('pay-at-property')}
-            className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
+            className={`flex items-center p-5 border-2 rounded-xl cursor-pointer transition-all ${
               selectedPayment === 'pay-at-property' 
-                ? 'border-orange-500 bg-orange-50' 
-                : 'border-gray-200 hover:border-orange-300'
+                ? 'border-[#1846ca] bg-blue-50' 
+                : 'border-blue-100 hover:border-[#1846ca] hover:bg-blue-50/30'
             }`}
           >
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${
+            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 ${
               selectedPayment === 'pay-at-property'
-                ? 'border-orange-500 bg-orange-500'
+                ? 'border-[#1846ca] bg-[#1846ca]'
                 : 'border-gray-300'
             }`}>
               {selectedPayment === 'pay-at-property' && <Check className="w-3 h-3 text-white" />}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <Building className="w-5 h-5 text-orange-600" />
+                <Building className="w-5 h-5 text-[#1846ca]" />
                 <div>
-                  <div className="font-medium text-gray-900">Pay at Property</div>
-                  <div className="text-sm text-gray-600">Payment during check-in</div>
+                  <div className="font-bold text-gray-900">Pay at Property</div>
+                  <div className="text-xs text-gray-500">Payment during check-in</div>
                 </div>
               </div>
             </div>
@@ -541,26 +493,25 @@ const CheckoutPayment = ({
         </div>
       </div>
 
-      {/* Security Notice */}
-      <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
         <div className="flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+          <Shield className="w-5 h-5 text-[#1846ca] mt-0.5" />
           <div>
-            <h4 className="font-semibold text-blue-900 mb-1">
+            <h4 className="font-bold text-gray-900 mb-1">
               {selectedPayment === 'online-payment' ? 'Secure Payment' : 'Booking Guarantee'}
             </h4>
-            <ul className="text-blue-700 text-sm space-y-1">
+            <ul className="text-xs text-gray-600 space-y-1">
               {selectedPayment === 'online-payment' ? (
                 <>
                   <li>• 256-bit SSL encryption</li>
-                  <li>• PCI DSS compliant payment processing</li>
-                  <li>• Instant booking confirmation</li>
+                  <li>• PCI DSS compliant</li>
+                  <li>• Instant confirmation</li>
                 </>
               ) : (
                 <>
-                  <li>• Instant booking confirmation</li>
-                  <li>• Payment at property during check-in</li>
-                  <li>• Valid ID required at check-in</li>
+                  <li>• Instant confirmation</li>
+                  <li>• Pay at check-in</li>
+                  <li>• Valid ID required</li>
                 </>
               )}
             </ul>
@@ -568,13 +519,13 @@ const CheckoutPayment = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <button
           type="button"
           onClick={handleConfirmBooking}
           disabled={!bookingDetails.bookingId || loading}
-          className="w-full py-4 px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+          className="w-full py-5 px-6 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] hover:from-[#1234a0] hover:to-[#1846ca] text-white rounded-2xl font-bold transition-all transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+          style={{ boxShadow: '0 10px 25px rgba(24,70,202,0.3)' }}
         >
           {loading ? (
             <>
@@ -588,8 +539,8 @@ const CheckoutPayment = ({
             </>
           ) : (
             <>
-              <Shield className="w-5 h-5" />
-              {selectedPayment === 'online-payment' ? 'Proceed to Payment' : 'Confirm Booking'}
+              <Lock className="w-5 h-5" />
+              {selectedPayment === 'online-payment' ? 'Proceed to Secure Payment' : 'Confirm Booking'}
               <ArrowRight className="w-5 h-5" />
             </>
           )}
@@ -599,18 +550,17 @@ const CheckoutPayment = ({
           type="button"
           onClick={prevStep}
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all disabled:opacity-50"
+          className="flex items-center justify-center gap-2 w-full py-4 px-6 bg-white hover:bg-blue-50 text-[#1846ca] rounded-xl font-semibold transition-all border-2 border-blue-200 hover:border-[#1846ca] disabled:opacity-50"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          Back to Details
         </button>
       </div>
 
-      {/* Support */}
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-xs text-gray-400">
         Need help? Contact{' '}
-        <a href="mailto:info@wavescation.com" className="text-orange-600 hover:text-orange-700 font-medium">
-          info@wavescation.com
+        <a href="mailto:info@alrknalraqy.com" className="text-[#1846ca] hover:text-[#1234a0] font-medium">
+          info@alrknalraqy.com
         </a>
       </div>
     </div>

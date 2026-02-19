@@ -75,13 +75,13 @@ const LoginPage = () => {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-12 text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-white bg-opacity-20 backdrop-blur-sm flex items-center justify-center">
               <img
-                src="https://www.wavescation.com/assets/logo-DC0iQ2p5.png"
-                alt="Wavescation Logo"
+                src="/logo.png"
+                alt="Alrkn Alraqy Hotel Management Logo"
                 className="w-16 h-16 object-contain"
               />
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2">wavescation</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Alrkn Alraqy Hotel Management</h1>
             <p className="text-blue-100 text-sm font-medium">Admin Portal</p>
           </div>
           <div className="px-8 py-8">
@@ -176,7 +176,7 @@ const LoginPage = () => {
           </div>
         </div>
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">© 2025 Nwavescation. All rights reserved.</p>
+          <p className="text-xs text-gray-500">© 2026 Alrkn Alraqy Hotel Management. All rights reserved.</p>
         </div>
       </div>
     </div>

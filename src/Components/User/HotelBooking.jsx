@@ -266,7 +266,7 @@ const HotelCheckout = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="container mx-auto px-4 pt-24">
           <div className="text-center py-20">
-            <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+            <Loader2 className="w-12 h-12 text-[#1846ca] animate-spin mx-auto mb-4" />
             <p className="text-gray-600 text-lg">Loading booking details...</p>
           </div>
         </div>
@@ -310,16 +310,16 @@ const HotelCheckout = () => {
         
         <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 bg-[#1846ca] flex items-center justify-center">
               <div className="w-6 h-6 bg-white rounded-full"></div>
             </div>
-            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-700 to-orange-600">
-              Wavescation
+            <div className="text-2xl font-bold bg-clip-text text-transparent bg-[#1846ca]">
+            Alrkn Alraqy
             </div>
           </div>
           <button 
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium transition-colors"
+            className="flex items-center gap-2 text-[#1846ca] hover:text-orange-600 font-medium transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Hotel
@@ -365,7 +365,7 @@ const HotelCheckout = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sticky top-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6 relative">
                 Booking Summary
-                <div className="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
+                <div className="absolute bottom-0 left-0 w-12 h-1 bg-[#1846ca] rounded-full"></div>
               </h2>
               
               <div className="space-y-4 mb-6">
@@ -425,7 +425,7 @@ const HotelCheckout = () => {
               
               <div className="flex justify-between items-center py-4 border-t-2 border-gray-200 bg-gradient-to-r from-orange-50 to-amber-50 -mx-6 px-6 rounded-xl">
                 <span className="text-lg font-bold text-gray-900">Total:</span>
-                <span className="text-2xl font-bold text-orange-600">AED {bookingDetails.total.toLocaleString()}</span>
+                <span className="text-2xl font-bold text-[#1846ca]">AED {bookingDetails.total.toLocaleString()}</span>
               </div>
               
               <div className="mt-6 rounded-xl overflow-hidden shadow-md">

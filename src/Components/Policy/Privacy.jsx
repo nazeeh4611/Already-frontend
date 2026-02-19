@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
             <div className="mb-8 inline-block">
-              <img src={logo} alt="Wavescation" className="h-32 mx-auto" />
+              <img src={logo} alt="Alrkn Alraqy Hotel Management" className="h-32 mx-auto" />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight text-gray-800">Privacy Policy</h1>
             <p className="text-xl md:text-2xl font-light max-w-3xl mx-auto leading-relaxed text-gray-700">
@@ -45,7 +45,7 @@ export default function PrivacyPolicy() {
               <h2 className="text-3xl md:text-4xl font-bold text-[rgb(0,0,0)] mb-6">How We Handle Your Information</h2>
               <div className="space-y-6 text-gray-700 leading-relaxed">
                 <p className="text-lg">
-                  Wavescation Holiday Homes ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our holiday home management services, visit our website, or interact with our platform.
+                Alrkn Alraqy Hotel Management ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our holiday home management services, visit our website, or interact with our platform.
                 </p>
                 <p className="text-lg">
                   As a DTCM-licensed holiday home management company based in Dubai, we adhere to UAE data protection regulations and international privacy standards to ensure your personal information is handled with the utmost care.

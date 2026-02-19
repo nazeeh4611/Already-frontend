@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
-import CheckoutDetails from './Chekout';
-import CheckoutPayment from './Payment';
+import CheckoutDetails from './CheckoutDetails';
+import CheckoutPayment from './CheckoutPayment';
+import CheckoutComplete from './CheckoutComplete';
 
 const CheckoutContainer = ({ bookingDetails }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -41,7 +41,7 @@ const CheckoutContainer = ({ bookingDetails }) => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-blue-100" style={{ boxShadow: '0 25px 60px rgba(24,70,202,0.12)' }}>
       {currentStep === 1 && (
         <CheckoutDetails
           formData={formData}
@@ -64,10 +64,10 @@ const CheckoutContainer = ({ bookingDetails }) => {
       )}
 
       {currentStep === 3 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-green-900 mb-2">Booking Confirmed!</h2>
-          <p className="text-green-700">Check your email for confirmation details</p>
-        </div>
+        <CheckoutComplete
+          formData={formData}
+          bookingDetails={bookingDetails}
+        />
       )}
     </div>
   );

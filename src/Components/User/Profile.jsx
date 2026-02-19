@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Calendar, MapPin, Clock, Eye, EyeOff, Edit, Check, X, Download, XCircle, ChevronDown, ChevronUp, Star, AlertCircle } from 'lucide-react';
+import { 
+  User, Lock, Calendar, MapPin, Clock, Eye, EyeOff, Edit, Check, X, 
+  Download, XCircle, ChevronDown, ChevronUp, Star, AlertCircle, 
+  Award, Shield, Mail, Phone, Home, Bookmark, Heart, Settings, LogOut,
+  Moon, Sun, Bell, CreditCard, FileText, HelpCircle
+} from 'lucide-react';
 import axios from 'axios';
 import { baseurl } from '../../Base/Base';
 import logo from "../../assets/logo.png";
@@ -12,13 +17,19 @@ const Toast = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+  const configs = {
+    success: { bg: 'from-emerald-500 to-emerald-600', icon: <Check className="w-5 h-5" /> },
+    error: { bg: 'from-red-500 to-red-600', icon: <AlertCircle className="w-5 h-5" /> },
+    info: { bg: 'from-[#1846ca] to-[#2a5ae0]', icon: <AlertCircle className="w-5 h-5" /> },
+  };
+  const c = configs[type] || configs.info;
 
   return (
-    <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in`}>
-      <div className="flex items-center gap-2">
-        <span>{message}</span>
-        <button onClick={onClose} className="ml-2">
+    <div className="fixed top-6 right-6 z-[9999] animate-in slide-in-from-right-4 fade-in duration-300">
+      <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl bg-gradient-to-r ${c.bg} text-white backdrop-blur-sm border border-white/20`}>
+        {c.icon}
+        <span className="text-sm font-semibold">{message}</span>
+        <button onClick={onClose} className="ml-2 hover:opacity-70 transition-opacity">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -27,25 +38,27 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 const ConfirmModal = ({ message, onConfirm, onCancel }) => (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-blue-100">
       <div className="flex items-start gap-4 mb-6">
-        <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+        <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <AlertCircle className="w-6 h-6 text-red-500" />
+        </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Cancellation</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Cancellation</h3>
           <p className="text-gray-600">{message}</p>
         </div>
       </div>
       <div className="flex gap-4">
         <button
           onClick={onConfirm}
-          className="flex-1 px-6 py-3 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all duration-300 font-semibold"
+          className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl hover:from-red-600 hover:to-red-700 transition-all duration-300 font-semibold shadow-lg"
         >
           Yes, Cancel Booking
         </button>
         <button
           onClick={onCancel}
-          className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-all duration-300 font-semibold"
+          className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-all duration-300 font-semibold"
         >
           No, Keep It
         </button>
@@ -125,22 +138,25 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl my-8">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto backdrop-blur-sm">
+      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl my-8 border border-blue-100">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-gray-800">Rate Your Stay</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="w-6 h-6" />
+          <h3 className="text-2xl font-bold text-gray-900">Rate Your Stay</h3>
+          <button onClick={onClose} className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+            <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
 
-        <div className="mb-6">
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">{booking.property.title}</h4>
-          <p className="text-gray-600">{booking.property.location}</p>
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl">
+          <h4 className="text-lg font-bold text-gray-900 mb-1">{booking.property.title}</h4>
+          <div className="flex items-center text-gray-600">
+            <MapPin className="w-4 h-4 mr-1 text-[#1846ca]" />
+            <span className="text-sm">{booking.property.location}</span>
+          </div>
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-bold uppercase tracking-widest text-blue-400 mb-3">
             Overall Rating <span className="text-red-500">*</span>
           </label>
           <div className="flex gap-2">
@@ -152,7 +168,7 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
               hoveredRating
             )}
             {rating > 0 && (
-              <span className="ml-3 text-lg font-semibold text-gray-700">
+              <span className="ml-3 text-lg font-bold text-[#1846ca]">
                 {rating} / 5
               </span>
             )}
@@ -160,13 +176,13 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-4">
-            Rate Categories (Optional - will use overall rating if not set)
+          <label className="block text-sm font-bold uppercase tracking-widest text-blue-400 mb-4">
+            Rate Categories (Optional)
           </label>
-          <div className="space-y-4 bg-gray-50 p-4 rounded-2xl">
+          <div className="space-y-4 bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
             {Object.keys(categories).map((category) => (
               <div key={category} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 w-32">
+                <span className="text-sm font-semibold text-gray-700 w-32">
                   {categoryLabels[category]}
                 </span>
                 <div className="flex gap-1">
@@ -190,7 +206,7 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
                   ))}
                 </div>
                 {categories[category] > 0 && (
-                  <span className="text-sm font-semibold text-gray-600 w-16 text-right">
+                  <span className="text-sm font-bold text-[#1846ca] w-16 text-right">
                     {categories[category]} / 5
                   </span>
                 )}
@@ -200,18 +216,18 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-bold uppercase tracking-widest text-blue-400 mb-3">
             Your Review (Optional)
           </label>
           <textarea
             value={review}
             onChange={(e) => setReview(e.target.value)}
             placeholder="Share your experience... What did you like? What could be improved?"
-            className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-5 py-4 border-2 border-blue-100 rounded-2xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-none"
             rows="4"
             maxLength={1000}
           />
-          <div className="text-right text-xs text-gray-500 mt-1">
+          <div className="text-right text-xs text-gray-400 mt-1">
             {review.length} / 1000 characters
           </div>
         </div>
@@ -219,14 +235,13 @@ const RatingModal = ({ booking, onClose, onSubmit, showToast }) => {
         <div className="flex gap-4">
           <button
             onClick={handleSubmit}
-            className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all duration-300 font-semibold"
-            style={{ backgroundColor: 'rgb(231, 121, 0)' }}
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-2xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 font-bold shadow-lg"
           >
             Submit Review
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-all duration-300 font-semibold"
+            className="px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-all duration-300 font-semibold"
           >
             Cancel
           </button>
@@ -244,146 +259,152 @@ const InvoiceGenerator = ({ booking, logoUrl }) => {
       <head>
         <title>Wavescation Invoice - ${booking._id}</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #f7dbbd; padding-bottom: 20px; }
-          .logo { height: 120px; }
+          body { font-family: 'Inter', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; background: #f8fafc; }
+          .invoice-container { background: white; border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(24,70,202,0.25); border: 1px solid #e0e7ff; }
+          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #1846ca; padding-bottom: 20px; }
+          .logo { height: 80px; }
           .header-info { text-align: right; }
-          .header h1 { color: #000; margin: 0; font-size: 32px; }
-          .header p { color: #666; margin: 5px 0; }
+          .header h1 { color: #1846ca; margin: 0; font-size: 32px; font-weight: 800; }
+          .header p { color: #64748b; margin: 5px 0; }
           .invoice-details { display: flex; justify-content: space-between; margin: 30px 0; }
           .section { margin: 20px 0; }
-          .section-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #000; border-bottom: 2px solid #f7dbbd; padding-bottom: 5px; }
-          .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-          .info-label { font-weight: 600; color: #666; }
-          .info-value { color: #000; }
-          .property-details { background: #f8fcff; padding: 20px; border-radius: 10px; margin: 20px 0; }
+          .section-title { font-weight: 800; font-size: 18px; margin-bottom: 10px; color: #1846ca; border-bottom: 2px solid #e0e7ff; padding-bottom: 5px; }
+          .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e7ff; }
+          .info-label { font-weight: 600; color: #64748b; }
+          .info-value { color: #0f172a; font-weight: 600; }
+          .property-details { background: #f0f4ff; padding: 20px; border-radius: 16px; margin: 20px 0; border: 1px solid #dbeafe; }
           .pricing-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          .pricing-table td { padding: 10px; border-bottom: 1px solid #eee; }
-          .pricing-table .label { color: #666; }
-          .pricing-table .value { text-align: right; font-weight: 600; }
-          .total-row { font-size: 20px; font-weight: bold; background: #f7dbbd; }
-          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #f7dbbd; color: #666; }
-          .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-          .status-confirmed { background: #d4edda; color: #155724; }
+          .pricing-table td { padding: 12px; border-bottom: 1px solid #e0e7ff; }
+          .pricing-table .label { color: #64748b; }
+          .pricing-table .value { text-align: right; font-weight: 600; color: #0f172a; }
+          .total-row { font-size: 20px; font-weight: 800; background: #1846ca; color: white; }
+          .total-row td { padding: 15px; }
+          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e7ff; color: #64748b; }
+          .status-badge { display: inline-block; padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+          .status-confirmed { background: #dbeafe; color: #1846ca; }
           .status-pending { background: #fff3cd; color: #856404; }
-          .status-completed { background: #d1ecf1; color: #0c5460; }
-          .status-cancelled { background: #f8d7da; color: #721c24; }
+          .status-completed { background: #d1e7ff; color: #0c4a6e; }
+          .status-cancelled { background: #fee2e2; color: #b91c1c; }
+          .wavescation-gradient { background: linear-gradient(135deg, #1846ca, #2a5ae0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
           @media print {
-            body { padding: 20px; }
+            body { background: white; padding: 20px; }
+            .invoice-container { box-shadow: none; border: 1px solid #e0e7ff; }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <img src="${logoUrl}" alt="Wavescation" class="logo" />
-          <div class="header-info">
-            <h1>BOOKING INVOICE</h1>
-            <p>Invoice ID: ${booking._id}</p>
-            <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <div class="invoice-container">
+          <div class="header">
+            <img src="${logoUrl}" alt="Wavescation" class="logo" />
+            <div class="header-info">
+              <h1>BOOKING INVOICE</h1>
+              <p>Invoice ID: ${booking._id}</p>
+              <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
           </div>
-        </div>
 
-        <div class="invoice-details">
-          <div>
-            <div class="section-title">Guest Information</div>
-            <p><strong>Name:</strong> ${booking.guestName || 'N/A'}</p>
-            <p><strong>Email:</strong> ${booking.guestEmail || 'N/A'}</p>
-            <p><strong>Phone:</strong> ${booking.guestPhone || 'N/A'}</p>
+          <div class="invoice-details">
+            <div>
+              <div class="section-title">Guest Information</div>
+              <p><strong>Name:</strong> ${booking.guestName || 'N/A'}</p>
+              <p><strong>Email:</strong> ${booking.guestEmail || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${booking.guestPhone || 'N/A'}</p>
+            </div>
+            <div>
+              <div class="section-title">Booking Status</div>
+              <p><span class="status-badge status-${booking.bookingStatus}">${booking.bookingStatus.toUpperCase()}</span></p>
+              <p><strong>Payment:</strong> ${booking.paymentStatus}</p>
+              <p><strong>Booked on:</strong> ${new Date(booking.createdAt).toLocaleDateString()}</p>
+            </div>
           </div>
-          <div>
-            <div class="section-title">Booking Status</div>
-            <p><span class="status-badge status-${booking.bookingStatus}">${booking.bookingStatus.toUpperCase()}</span></p>
-            <p><strong>Payment:</strong> ${booking.paymentStatus}</p>
-            <p><strong>Booked on:</strong> ${new Date(booking.createdAt).toLocaleDateString()}</p>
-          </div>
-        </div>
 
-        <div class="property-details">
-          <div class="section-title">Property Details</div>
-          <h2>${booking.property.title}</h2>
-          <p><strong>Location:</strong> ${booking.property.location}</p>
-          <p><strong>Guests:</strong> ${booking.guests}</p>
-        </div>
+          <div class="property-details">
+            <div class="section-title">Property Details</div>
+            <h2 style="color: #1846ca; margin-bottom: 10px;">${booking.property.title}</h2>
+            <p><strong>Location:</strong> ${booking.property.location}</p>
+            <p><strong>Guests:</strong> ${booking.guests}</p>
+          </div>
 
-        <div class="section">
-          <div class="section-title">Stay Details</div>
-          <div class="info-row">
-            <span class="info-label">Check-in Date:</span>
-            <span class="info-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <div class="section">
+            <div class="section-title">Stay Details</div>
+            <div class="info-row">
+              <span class="info-label">Check-in Date:</span>
+              <span class="info-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Check-out Date:</span>
+              <span class="info-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Pricing Period:</span>
+              <span class="info-value">${booking.pricingPeriod}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Number of Units:</span>
+              <span class="info-value">${booking.units}</span>
+            </div>
           </div>
-          <div class="info-row">
-            <span class="info-label">Check-out Date:</span>
-            <span class="info-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Pricing Period:</span>
-            <span class="info-value">${booking.pricingPeriod}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Number of Units:</span>
-            <span class="info-value">${booking.units}</span>
-          </div>
-        </div>
 
-        <div class="section">
-          <div class="section-title">Price Breakdown</div>
-          <table class="pricing-table">
-            <tr>
-              <td class="label">Price per ${booking.pricingPeriod}</td>
-              <td class="value">$${booking.pricePerUnit.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td class="label">Subtotal (${booking.units} ${booking.pricingPeriod}${booking.units > 1 ? 's' : ''})</td>
-              <td class="value">$${booking.subtotal.toFixed(2)}</td>
-            </tr>
-            ${booking.cleaningFee > 0 ? `
-            <tr>
-              <td class="label">Cleaning Fee</td>
-              <td class="value">$${booking.cleaningFee.toFixed(2)}</td>
-            </tr>` : ''}
-            ${booking.serviceFee > 0 ? `
-            <tr>
-              <td class="label">Service Fee</td>
-              <td class="value">$${booking.serviceFee.toFixed(2)}</td>
-            </tr>` : ''}
-            ${booking.cityTax > 0 ? `
-            <tr>
-              <td class="label">City Tax</td>
-              <td class="value">$${booking.cityTax.toFixed(2)}</td>
-            </tr>` : ''}
-            ${booking.vat > 0 ? `
-            <tr>
-              <td class="label">VAT</td>
-              <td class="value">$${booking.vat.toFixed(2)}</td>
-            </tr>` : ''}
-            <tr class="total-row">
-              <td>TOTAL AMOUNT</td>
-              <td style="text-align: right;">$${booking.totalPrice.toFixed(2)}</td>
-            </tr>
-          </table>
-        </div>
+          <div class="section">
+            <div class="section-title">Price Breakdown</div>
+            <table class="pricing-table">
+              <tr>
+                <td class="label">Price per ${booking.pricingPeriod}</td>
+                <td class="value">AED ${booking.pricePerUnit.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td class="label">Subtotal (${booking.units} ${booking.pricingPeriod}${booking.units > 1 ? 's' : ''})</td>
+                <td class="value">AED ${booking.subtotal.toFixed(2)}</td>
+              </tr>
+              ${booking.cleaningFee > 0 ? `
+              <tr>
+                <td class="label">Cleaning Fee</td>
+                <td class="value">AED ${booking.cleaningFee.toFixed(2)}</td>
+              </tr>` : ''}
+              ${booking.serviceFee > 0 ? `
+              <tr>
+                <td class="label">Service Fee</td>
+                <td class="value">AED ${booking.serviceFee.toFixed(2)}</td>
+              </tr>` : ''}
+              ${booking.cityTax > 0 ? `
+              <tr>
+                <td class="label">City Tax</td>
+                <td class="value">AED ${booking.cityTax.toFixed(2)}</td>
+              </tr>` : ''}
+              ${booking.vat > 0 ? `
+              <tr>
+                <td class="label">VAT</td>
+                <td class="value">AED ${booking.vat.toFixed(2)}</td>
+              </tr>` : ''}
+              <tr class="total-row">
+                <td>TOTAL AMOUNT</td>
+                <td style="text-align: right;">AED ${booking.totalPrice.toFixed(2)}</td>
+              </tr>
+            </table>
+          </div>
 
-        <div class="section">
-          <div class="section-title">Payment Information</div>
-          <div class="info-row">
-            <span class="info-label">Payment Method:</span>
-            <span class="info-value">${booking.paymentMethod.replace(/-/g, ' ').toUpperCase()}</span>
+          <div class="section">
+            <div class="section-title">Payment Information</div>
+            <div class="info-row">
+              <span class="info-label">Payment Method:</span>
+              <span class="info-value">${booking.paymentMethod.replace(/-/g, ' ').toUpperCase()}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Advance Payment:</span>
+              <span class="info-value">${booking.advancePaymentPaid ? 'Paid' : 'Not Paid'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Payment Status:</span>
+              <span class="info-value">${booking.paymentStatus.toUpperCase()}</span>
+            </div>
           </div>
-          <div class="info-row">
-            <span class="info-label">Advance Payment:</span>
-            <span class="info-value">${booking.advancePaymentPaid ? 'Paid' : 'Not Paid'}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Payment Status:</span>
-            <span class="info-value">${booking.paymentStatus.toUpperCase()}</span>
-          </div>
-        </div>
 
-        <div class="footer">
-          <p><strong>Wavescation Holiday Homes</strong></p>
-          <p>Iris Bay Tower, Business Bay, Dubai</p>
-          <p>Phone: +971 52 259 6860 | Email: Info@wavescation.com</p>
-          <p style="margin-top: 20px;">Thank you for choosing Wavescation!</p>
+          <div class="footer">
+            <p><strong class="wavescation-gradient">Wavescation Holiday Homes</strong></p>
+            <p>Iris Bay Tower, Business Bay, Dubai</p>
+            <p>Phone: +971 52 259 6860 | Email: Info@wavescation.com</p>
+            <p style="margin-top: 20px;">Thank you for choosing Wavescation!</p>
+          </div>
         </div>
       </body>
       </html>
@@ -403,7 +424,7 @@ const InvoiceGenerator = ({ booking, logoUrl }) => {
   return (
     <button
       onClick={generateInvoice}
-      className="px-6 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg"
+      className="px-6 py-3 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg"
     >
       <Download className="w-4 h-4" />
       Download Invoice
@@ -598,9 +619,9 @@ const ProfilePage = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'pending': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'confirmed': return 'bg-blue-100 text-[#1846ca] border-blue-200';
+      case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -632,8 +653,9 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[rgb(247,247,247)] via-white to-[rgb(248,252,255)]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <Navbar />
+      
       {toast && (
         <Toast
           message={toast.message}
@@ -641,6 +663,7 @@ const ProfilePage = () => {
           onClose={() => setToast(null)}
         />
       )}
+      
       {confirmCancel && (
         <ConfirmModal
           message="Are you sure you want to cancel this booking? This action cannot be undone."
@@ -661,99 +684,172 @@ const ProfilePage = () => {
         />
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-8 pt-28">
-        <div className="mb-20 text-center">
-          <h1 className="text-5xl font-bold text-[rgb(0,0,0)] mb-4 tracking-tight">My Profile</h1>
-          <p className="text-xl font-light text-gray-700 max-w-2xl mx-auto leading-relaxed">Manage your account settings and view your bookings</p>
-          <div className="mt-8 w-24 h-1 bg-gray-600 mx-auto rounded-full"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
+        <div className="text-center mb-12">
+          <div className="inline-block p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-2xl flex items-center justify-center shadow-lg">
+              <User className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 mb-3">My Profile</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">Manage your account settings and view your bookings</p>
+          <div className="mt-4 w-24 h-1 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] mx-auto rounded-full"></div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
           <div className="lg:w-1/4">
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden sticky top-8">
-              <div className="p-8 bg-gradient-to-br from-[rgb(247,219,190)] to-[rgb(247,219,190)]/80 text-gray-800 relative">
-                <div className="absolute inset-0 bg-black/5"></div>
+            <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden sticky top-24" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+              <div className="p-8 bg-gradient-to-br from-[#1846ca] to-[#2a5ae0] text-white relative">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.3)_0%,_transparent_70%)]"></div>
                 <div className="relative">
-                  <div className="w-24 h-24 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 mx-auto shadow-xl">
-                    <User className="w-12 h-12 text-gray-800" />
+                  <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-xl border-2 border-white/30">
+                    <User className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-center mb-2">{userDetails.name}</h3>
-                  <p className="text-gray-700 text-center text-sm">{userDetails.email}</p>
+                  <h3 className="text-xl font-bold text-center mb-1">{userDetails.name}</h3>
+                  <p className="text-blue-100 text-center text-sm truncate">{userDetails.email}</p>
                 </div>
               </div>
-              <div className="p-8">
-                <nav className="space-y-4">
-                  <button onClick={() => setActiveTab('profile')} className={`w-full text-left px-6 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${activeTab === 'profile' ? 'bg-[rgb(247,219,190)]/30 text-gray-800 border border-[rgb(247,219,190)]/50 shadow-lg transform scale-105' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}`}>
-                    <User className="w-5 h-5" /> Profile Details
+              <div className="p-6">
+                <nav className="space-y-2">
+                  <button 
+                    onClick={() => setActiveTab('profile')} 
+                    className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${
+                      activeTab === 'profile' 
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-[#1846ca] border border-blue-200 shadow-md' 
+                        : 'text-gray-600 hover:bg-blue-50 hover:text-[#1846ca]'
+                    }`}
+                  >
+                    <User className="w-5 h-5" /> 
+                    Profile Details
                   </button>
-                  <button onClick={() => setActiveTab('bookings')} className={`w-full text-left px-6 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${activeTab === 'bookings' ? 'bg-[rgb(247,219,190)]/30 text-gray-800 border border-[rgb(247,219,190)]/50 shadow-lg transform scale-105' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}`}>
-                    <Calendar className="w-5 h-5" /> My Bookings ({bookings.length})
+                  
+                  <button 
+                    onClick={() => setActiveTab('bookings')} 
+                    className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${
+                      activeTab === 'bookings' 
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-[#1846ca] border border-blue-200 shadow-md' 
+                        : 'text-gray-600 hover:bg-blue-50 hover:text-[#1846ca]'
+                    }`}
+                  >
+                    <Calendar className="w-5 h-5" /> 
+                    My Bookings ({bookings.length})
                   </button>
+                  
                   <button
                     onClick={() => setActiveTab('reviews')}
-                    className={`w-full text-left px-6 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${activeTab === 'reviews'
-                      ? 'bg-[rgb(247,219,190)]/30 text-gray-800 border border-[rgb(247,219,190)]/50 shadow-lg transform scale-105'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                      }`}
+                    className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 flex items-center gap-3 font-semibold ${
+                      activeTab === 'reviews'
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-[#1846ca] border border-blue-200 shadow-md'
+                        : 'text-gray-600 hover:bg-blue-50 hover:text-[#1846ca]'
+                    }`}
                   >
-                    <Star className="w-5 h-5" /> My Reviews
+                    <Star className="w-5 h-5" /> 
+                    My Reviews
                   </button>
+
+                  
                 </nav>
               </div>
             </div>
           </div>
 
+          {/* Main Content */}
           <div className="lg:w-3/4">
             {activeTab === 'profile' && (
-              <div className="space-y-8">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-[rgb(247,219,190)]/20 rounded-3xl transform group-hover:scale-105 transition-all duration-500"></div>
-                  <div className="relative bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-10 m-1">
+              <div className="space-y-6">
+                {/* Profile Information */}
+                <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+                  <div className="p-8">
                     <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-3xl font-bold text-[rgb(0,0,0)] flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[rgb(247,219,190)] rounded-2xl flex items-center justify-center">
-                          <User className="w-6 h-6 text-gray-800" />
+                      <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-xl flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
                         </div>
                         Profile Information
                       </h2>
-                      <button onClick={() => setIsEditingProfile(!isEditingProfile)} disabled={loading} className="px-6 py-3 bg-[rgb(247,219,190)] text-gray-800 rounded-2xl hover:bg-[rgb(247,219,190)]/80 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg">
+                      <button 
+                        onClick={() => setIsEditingProfile(!isEditingProfile)} 
+                        disabled={loading} 
+                        className="px-5 py-3 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg"
+                      >
                         <Edit className="w-4 h-4" />
                         {isEditingProfile ? 'Cancel' : 'Edit Profile'}
                       </button>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Full Name</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">
+                          <User className="w-4 h-4 inline mr-1" /> Full Name
+                        </label>
                         {isEditingProfile ? (
-                          <input type="text" value={userDetails.name} onChange={(e) => setUserDetails({ ...userDetails, name: e.target.value })} className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[rgb(247,219,190)] focus:border-transparent bg-white/50 backdrop-blur-sm text-gray-800 font-medium transition-all duration-300" />
+                          <input 
+                            type="text" 
+                            value={userDetails.name} 
+                            onChange={(e) => setUserDetails({ ...userDetails, name: e.target.value })} 
+                            className="w-full px-5 py-4 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white text-gray-900 font-medium"
+                          />
                         ) : (
-                          <div className="px-6 py-4 bg-[rgb(248,252,255)] rounded-2xl text-gray-800 font-medium">{userDetails.name}</div>
+                          <div className="px-5 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl text-gray-900 font-medium border border-blue-100">
+                            {userDetails.name}
+                          </div>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Email Address</label>
-                        <div className="px-6 py-4 bg-gray-100 rounded-2xl text-gray-500 font-medium">{userDetails.email}</div>
-                        <p className="text-xs text-gray-500 mt-2 italic">Email cannot be changed</p>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">
+                          <Mail className="w-4 h-4 inline mr-1" /> Email Address
+                        </label>
+                        <div className="px-5 py-4 bg-gray-100 rounded-xl text-gray-500 font-medium border border-gray-200">
+                          {userDetails.email}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2 italic">Email cannot be changed</p>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Phone Number</label>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">
+                          <Phone className="w-4 h-4 inline mr-1" /> Phone Number
+                        </label>
                         {isEditingProfile ? (
-                          <input type="tel" value={userDetails.mobile} onChange={(e) => setUserDetails({ ...userDetails, mobile: e.target.value })} className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[rgb(247,219,190)] focus:border-transparent bg-white/50 backdrop-blur-sm text-gray-800 font-medium transition-all duration-300" />
+                          <input 
+                            type="tel" 
+                            value={userDetails.mobile} 
+                            onChange={(e) => setUserDetails({ ...userDetails, mobile: e.target.value })} 
+                            className="w-full px-5 py-4 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white text-gray-900 font-medium"
+                          />
                         ) : (
-                          <div className="px-6 py-4 bg-[rgb(248,252,255)] rounded-2xl text-gray-800 font-medium">{userDetails.mobile}</div>
+                          <div className="px-5 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl text-gray-900 font-medium border border-blue-100">
+                            {userDetails.mobile || 'Not provided'}
+                          </div>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">
+                          <Award className="w-4 h-4 inline mr-1" /> Member Since
+                        </label>
+                        <div className="px-5 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl text-gray-900 font-medium border border-blue-100">
+                          {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        </div>
                       </div>
                     </div>
 
                     {isEditingProfile && (
                       <div className="flex gap-4 mt-8">
-                        <button onClick={handleProfileSave} disabled={loading} className="px-8 py-4 bg-green-500 text-white rounded-2xl hover:bg-green-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg">
-                          <Check className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Changes'}
+                        <button 
+                          onClick={handleProfileSave} 
+                          disabled={loading} 
+                          className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-bold shadow-lg"
+                        >
+                          <Check className="w-4 h-4" /> 
+                          {loading ? 'Saving...' : 'Save Changes'}
                         </button>
-                        <button onClick={handleCancelEdit} disabled={loading} className="px-8 py-4 bg-gray-500 text-white rounded-2xl hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg">
+                        <button 
+                          onClick={handleCancelEdit} 
+                          disabled={loading} 
+                          className="px-8 py-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold"
+                        >
                           <X className="w-4 h-4" /> Cancel
                         </button>
                       </div>
@@ -761,178 +857,248 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
+                {/* Change Password Section */}
                 {!userDetails.isGoogleUser && (
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-[rgb(247,219,190)]/20 rounded-3xl transform group-hover:scale-105 transition-all duration-500"></div>
-                    <div className="relative bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-10 m-1">
+                  <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+                    <div className="p-8">
                       <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-3xl font-bold text-[rgb(0,0,0)] flex items-center gap-4">
-                          <div className="w-12 h-12 bg-[rgb(247,219,190)] rounded-2xl flex items-center justify-center">
-                            <Lock className="w-6 h-6 text-gray-800" />
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-xl flex items-center justify-center">
+                            <Lock className="w-5 h-5 text-white" />
                           </div>
-                          Change Password
+                          Security
                         </h2>
-                        <button onClick={() => setIsChangingPassword(!isChangingPassword)} disabled={loading} className="px-6 py-3 bg-[rgb(247,219,190)] text-gray-800 rounded-2xl hover:bg-[rgb(247,219,190)]/80 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 font-semibold shadow-lg">
+                        <button 
+                          onClick={() => setIsChangingPassword(!isChangingPassword)} 
+                          disabled={loading} 
+                          className="px-5 py-3 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg"
+                        >
+                          <Shield className="w-4 h-4" />
                           {isChangingPassword ? 'Cancel' : 'Change Password'}
                         </button>
                       </div>
 
                       {isChangingPassword ? (
                         <div className="space-y-6">
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Current Password</label>
-                            <div className="relative">
-                              <input type={showPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })} className="w-full px-6 py-4 pr-14 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[rgb(247,219,190)] focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-300" placeholder="Enter current password" />
-                              <button onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                              <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">Current Password</label>
+                              <div className="relative">
+                                <input 
+                                  type={showPassword ? 'text' : 'password'} 
+                                  value={passwordData.currentPassword} 
+                                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })} 
+                                  className="w-full px-5 py-4 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                                  placeholder="Enter current password"
+                                />
+                                <button 
+                                  onClick={() => setShowPassword(!showPassword)} 
+                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1846ca] transition-colors"
+                                >
+                                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">New Password</label>
+                              <div className="relative">
+                                <input 
+                                  type={showNewPassword ? 'text' : 'password'} 
+                                  value={passwordData.newPassword} 
+                                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })} 
+                                  className="w-full px-5 py-4 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                                  placeholder="Enter new password"
+                                />
+                                <button 
+                                  onClick={() => setShowNewPassword(!showNewPassword)} 
+                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1846ca] transition-colors"
+                                >
+                                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">Confirm Password</label>
+                              <div className="relative">
+                                <input 
+                                  type={showConfirmPassword ? 'text' : 'password'} 
+                                  value={passwordData.confirmPassword} 
+                                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })} 
+                                  className="w-full px-5 py-4 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white"
+                                  placeholder="Confirm new password"
+                                />
+                                <button 
+                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
+                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1846ca] transition-colors"
+                                >
+                                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                              </div>
                             </div>
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">New Password</label>
-                            <div className="relative">
-                              <input type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })} className="w-full px-6 py-4 pr-14 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[rgb(247,219,190)] focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-300" placeholder="Enter new password" />
-                              <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Confirm New Password</label>
-                            <div className="relative">
-                              <input type={showConfirmPassword ? 'text' : 'password'} value={passwordData.confirmPassword} onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })} className="w-full px-6 py-4 pr-14 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[rgb(247,219,190)] focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-300" placeholder="Confirm new password" />
-                              <button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex gap-4 mt-8">
-                            <button onClick={handlePasswordChange} disabled={loading} className="px-8 py-4 bg-green-500 text-white rounded-2xl hover:bg-green-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg">
-                              <Check className="w-4 h-4" /> {loading ? 'Updating...' : 'Update Password'}
+                          <div className="flex gap-4 mt-6">
+                            <button 
+                              onClick={handlePasswordChange} 
+                              disabled={loading} 
+                              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-bold shadow-lg"
+                            >
+                              <Check className="w-4 h-4" /> 
+                              {loading ? 'Updating...' : 'Update Password'}
                             </button>
-                            <button onClick={() => setIsChangingPassword(false)} disabled={loading} className="px-8 py-4 bg-gray-500 text-white rounded-2xl hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold shadow-lg">
+                            <button 
+                              onClick={() => setIsChangingPassword(false)} 
+                              disabled={loading} 
+                              className="px-8 py-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 font-semibold"
+                            >
                               <X className="w-4 h-4" /> Cancel
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-gray-600 text-lg font-light leading-relaxed">Keep your account secure by updating your password regularly.</p>
+                        <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] flex items-center justify-center">
+                            <Shield className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-gray-900 font-semibold">Password never expires</p>
+                            <p className="text-sm text-gray-500">Last changed • 30 days ago</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
                 )}
 
                 {userDetails.isGoogleUser && (
-                  <div className="text-center text-gray-500 italic mt-4">
-                    Password management is disabled for Google accounts.
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8 border border-blue-200">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] flex items-center justify-center">
+                        <Award className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-gray-900 font-bold text-lg">Google Account</p>
+                        <p className="text-gray-600">Password management is handled by Google</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'bookings' && (
-              <div className="relative group">
-                <div className="absolute inset-0 bg-[rgb(247,219,190)]/20 rounded-3xl transform group-hover:scale-105 transition-all duration-500"></div>
-                <div className="relative bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-10 m-1">
+              <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+                <div className="p-8">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-[rgb(0,0,0)] flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[rgb(247,219,190)] rounded-2xl flex items-center justify-center">
-                        <Calendar className="w-6 h-6 text-gray-800" />
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-xl flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-white" />
                       </div>
                       My Bookings ({bookings.length})
                     </h2>
                   </div>
 
                   {bookings.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No bookings found</h3>
-                      <p className="text-gray-500">You haven't made any bookings yet.</p>
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center">
+                        <Calendar className="w-12 h-12 text-[#1846ca]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">No bookings found</h3>
+                      <p className="text-gray-500 mb-6">You haven't made any bookings yet.</p>
+                      <button 
+                        onClick={() => window.location.href = '/property'}
+                        className="px-8 py-4 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 transform hover:scale-105 font-bold shadow-lg"
+                      >
+                        Browse Properties
+                      </button>
                     </div>
                   ) : (
                     <div className="space-y-6">
                       {bookings.map((booking) => {
                         const isCancelled = booking.bookingStatus === 'cancelled';
                         return (
-                          <div key={booking._id} className={`bg-white rounded-2xl shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-300 ${isCancelled ? 'border-red-200 opacity-75' : 'border-gray-100'}`}>
+                          <div key={booking._id} className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-300 hover:shadow-xl ${
+                            isCancelled ? 'border-red-200 opacity-75' : 'border-blue-100'
+                          }`}>
                             {isCancelled && <CancelledBanner />}
+                            
                             <div className="flex flex-col md:flex-row">
+                              {/* Property Image */}
                               <div
-                                className="md:w-1/3 cursor-pointer relative"
+                                className="md:w-1/3 cursor-pointer relative overflow-hidden group"
                                 onClick={() => handlePropertyClick(booking.property._id, booking.guests)}
                               >
                                 <img
                                   src={getPropertyImage(booking.property)}
                                   alt={booking.property.title}
-                                  className={`w-full h-48 md:h-full object-cover hover:scale-105 transition-transform duration-300 ${isCancelled ? 'grayscale' : ''}`}
+                                  className={`w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-110 ${isCancelled ? 'grayscale' : ''}`}
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 {isCancelled && (
-                                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                    <span className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-sm">CANCELLED</span>
+                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                    <span className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">CANCELLED</span>
                                   </div>
                                 )}
                               </div>
 
+                              {/* Booking Details */}
                               <div className="md:w-2/3 p-6">
                                 <div className="flex items-start justify-between mb-4">
                                   <div
                                     className="cursor-pointer flex-1"
                                     onClick={() => handlePropertyClick(booking.property._id, booking.guests)}
                                   >
-                                    <h3 className="text-xl font-bold text-gray-800 mb-2 hover:text-[rgb(247,219,190)] transition-colors">{booking.property.title}</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-[#1846ca] transition-colors">
+                                      {booking.property.title}
+                                    </h3>
                                     <div className="flex items-center text-gray-600 mb-2">
-                                      <MapPin className="w-4 h-4 mr-1" />
-                                      <span>{booking.property.location}</span>
+                                      <MapPin className="w-4 h-4 mr-1 text-[#1846ca]" />
+                                      <span className="text-sm">{booking.property.location}</span>
                                     </div>
-                                    <div className="flex items-center text-gray-600 mb-2">
-                                      <User className="w-4 h-4 mr-1" />
-                                      <span>{booking.guests} Guest{booking.guests > 1 ? 's' : ''}</span>
+                                    <div className="flex items-center text-gray-600">
+                                      <User className="w-4 h-4 mr-1 text-[#1846ca]" />
+                                      <span className="text-sm">{booking.guests} Guest{booking.guests > 1 ? 's' : ''}</span>
                                     </div>
                                   </div>
 
                                   <div className="text-right">
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.bookingStatus)}`}>
+                                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold border ${getStatusColor(booking.bookingStatus)}`}>
                                       {booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1)}
                                     </span>
-                                    <div className={`mt-2 text-2xl font-bold ${isCancelled ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
-                                      ${booking.totalPrice}
-                                    </div>
-                                    {isCancelled && (
-                                      <div className="text-sm text-red-600 font-semibold mt-1">Refunded</div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                                  <div className="flex items-center text-gray-600">
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    <div>
-                                      <span className="text-sm font-medium">Check-in</span>
-                                      <div className="font-semibold">{formatDate(booking.checkIn)}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center text-gray-600">
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    <div>
-                                      <span className="text-sm font-medium">Check-out</span>
-                                      <div className="font-semibold">{formatDate(booking.checkOut)}</div>
+                                    <div className={`mt-3 text-2xl font-black ${isCancelled ? 'text-gray-400 line-through' : 'text-[#1846ca]'}`}>
+                                      AED {booking.totalPrice}
                                     </div>
                                   </div>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                  <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                                    <Calendar className="w-5 h-5 text-[#1846ca]" />
+                                    <div>
+                                      <p className="text-xs text-gray-500">Check-in</p>
+                                      <p className="font-bold text-gray-900">{formatDate(booking.checkIn)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                                    <Calendar className="w-5 h-5 text-[#1846ca]" />
+                                    <div>
+                                      <p className="text-xs text-gray-500">Check-out</p>
+                                      <p className="font-bold text-gray-900">{formatDate(booking.checkOut)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between mt-4 pt-4 border-t border-blue-100">
                                   <div className="flex items-center text-sm text-gray-500">
-                                    <Clock className="w-4 h-4 mr-1" />
-                                    Booked on {formatDate(booking.createdAt)}
+                                    <Clock className="w-4 h-4 mr-1 text-[#1846ca]" />
+                                    Booked {formatDate(booking.createdAt)}
                                   </div>
 
                                   <button
                                     onClick={() => setExpandedBooking(expandedBooking === booking._id ? null : booking._id)}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[rgb(247,219,190)] transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-[#1846ca] hover:text-[#1234a0] transition-colors bg-blue-50 rounded-xl hover:bg-blue-100"
                                   >
                                     {expandedBooking === booking._id ? (
                                       <>
@@ -946,95 +1112,93 @@ const ProfilePage = () => {
                                   </button>
                                 </div>
 
+                                {/* Expanded Details */}
                                 {expandedBooking === booking._id && (
-                                  <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase">Guest Information</h4>
-                                        <div className="space-y-1 text-sm">
-                                          <p><span className="font-medium">Name:</span> {booking.guestName || 'N/A'}</p>
-                                          <p><span className="font-medium">Email:</span> {booking.guestEmail || 'N/A'}</p>
-                                          <p><span className="font-medium">Phone:</span> {booking.guestPhone || 'N/A'}</p>
+                                  <div className="mt-6 pt-6 border-t-2 border-blue-100 space-y-6">
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
+                                        <h4 className="text-sm font-bold uppercase tracking-widest text-[#1846ca] mb-3">Guest Information</h4>
+                                        <div className="space-y-2 text-sm">
+                                          <p><span className="font-semibold text-gray-600">Name:</span> {booking.guestName || 'N/A'}</p>
+                                          <p><span className="font-semibold text-gray-600">Email:</span> {booking.guestEmail || 'N/A'}</p>
+                                          <p><span className="font-semibold text-gray-600">Phone:</span> {booking.guestPhone || 'N/A'}</p>
                                         </div>
                                       </div>
 
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase">Booking Details</h4>
-                                        <div className="space-y-1 text-sm">
-                                          <p><span className="font-medium">Pricing Period:</span> {booking.pricingPeriod}</p>
-                                          <p><span className="font-medium">Units:</span> {booking.units}</p>
-                                          <p><span className="font-medium">Price per Unit:</span> ${booking.pricePerUnit}</p>
+                                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
+                                        <h4 className="text-sm font-bold uppercase tracking-widest text-[#1846ca] mb-3">Booking Details</h4>
+                                        <div className="space-y-2 text-sm">
+                                          <p><span className="font-semibold text-gray-600">Period:</span> {booking.pricingPeriod}</p>
+                                          <p><span className="font-semibold text-gray-600">Units:</span> {booking.units}</p>
+                                          <p><span className="font-semibold text-gray-600">Price/Unit:</span> AED {booking.pricePerUnit}</p>
                                         </div>
                                       </div>
                                     </div>
 
-                                    <div>
-                                      <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase">Price Breakdown</h4>
-                                      <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                                    {/* Price Breakdown */}
+                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
+                                      <h4 className="text-sm font-bold uppercase tracking-widest text-[#1846ca] mb-3">Price Breakdown</h4>
+                                      <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
-                                          <span>Subtotal</span>
-                                          <span className="font-semibold">${booking.subtotal.toFixed(2)}</span>
+                                          <span className="text-gray-600">Subtotal</span>
+                                          <span className="font-bold text-gray-900">AED {booking.subtotal.toFixed(2)}</span>
                                         </div>
                                         {booking.cleaningFee > 0 && (
                                           <div className="flex justify-between">
-                                            <span>Cleaning Fee</span>
-                                            <span className="font-semibold">${booking.cleaningFee.toFixed(2)}</span>
+                                            <span className="text-gray-600">Cleaning Fee</span>
+                                            <span className="font-bold text-gray-900">AED {booking.cleaningFee.toFixed(2)}</span>
                                           </div>
                                         )}
                                         {booking.serviceFee > 0 && (
                                           <div className="flex justify-between">
-                                            <span>Service Fee</span>
-                                            <span className="font-semibold">${booking.serviceFee.toFixed(2)}</span>
+                                            <span className="text-gray-600">Service Fee</span>
+                                            <span className="font-bold text-gray-900">AED {booking.serviceFee.toFixed(2)}</span>
                                           </div>
                                         )}
                                         {booking.cityTax > 0 && (
                                           <div className="flex justify-between">
-                                            <span>City Tax</span>
-                                            <span className="font-semibold">${booking.cityTax.toFixed(2)}</span>
+                                            <span className="text-gray-600">City Tax</span>
+                                            <span className="font-bold text-gray-900">AED {booking.cityTax.toFixed(2)}</span>
                                           </div>
                                         )}
                                         {booking.vat > 0 && (
                                           <div className="flex justify-between">
-                                            <span>VAT</span>
-                                            <span className="font-semibold">${booking.vat.toFixed(2)}</span>
+                                            <span className="text-gray-600">VAT</span>
+                                            <span className="font-bold text-gray-900">AED {booking.vat.toFixed(2)}</span>
                                           </div>
                                         )}
-                                        <div className="flex justify-between pt-2 border-t border-gray-200 font-bold text-base">
-                                          <span>Total</span>
-                                          <span className={isCancelled ? 'line-through text-gray-400' : ''}>
-                                            ${booking.totalPrice.toFixed(2)}
+                                        <div className="flex justify-between pt-2 border-t-2 border-blue-200 font-bold text-base">
+                                          <span className="text-gray-900">Total</span>
+                                          <span className={isCancelled ? 'line-through text-gray-400' : 'text-[#1846ca]'}>
+                                            AED {booking.totalPrice.toFixed(2)}
                                           </span>
                                         </div>
-                                        {isCancelled && (
-                                          <div className="flex justify-between pt-2 text-red-600 font-bold">
-                                            <span>Amount Refunded</span>
-                                            <span>${booking.totalPrice.toFixed(2)}</span>
-                                          </div>
-                                        )}
                                       </div>
                                     </div>
 
-                                    <div>
-                                      <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase">Payment Information</h4>
-                                      <div className="space-y-1 text-sm">
-                                        <p><span className="font-medium">Method:</span> {booking.paymentMethod.replace(/-/g, ' ').toUpperCase()}</p>
+                                    {/* Payment Information */}
+                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
+                                      <h4 className="text-sm font-bold uppercase tracking-widest text-[#1846ca] mb-3">Payment Information</h4>
+                                      <div className="space-y-2 text-sm">
+                                        <p><span className="font-semibold text-gray-600">Method:</span> {booking.paymentMethod.replace(/-/g, ' ').toUpperCase()}</p>
                                         <p>
-                                          <span className="font-medium">Status:</span>{' '}
-                                          <span className={`px-2 py-1 rounded text-xs font-medium ${isCancelled
+                                          <span className="font-semibold text-gray-600">Status:</span>{' '}
+                                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${isCancelled
                                             ? 'bg-red-100 text-red-800'
                                             : booking.paymentStatus === 'paid'
-                                              ? 'bg-green-100 text-green-800'
-                                              : 'bg-orange-100 text-orange-800'
+                                              ? 'bg-emerald-100 text-emerald-800'
+                                              : 'bg-amber-100 text-amber-800'
                                             }`}>
                                             {isCancelled ? 'REFUNDED' : booking.paymentStatus.toUpperCase()}
                                           </span>
                                         </p>
-                                        <p><span className="font-medium">Advance Payment:</span> {booking.advancePaymentPaid ? 'Paid' : 'Not Paid'}</p>
+                                        <p><span className="font-semibold text-gray-600">Advance Payment:</span> {booking.advancePaymentPaid ? 'Paid' : 'Not Paid'}</p>
                                       </div>
                                     </div>
 
+                                    {/* Action Buttons */}
                                     {!isCancelled && (
-                                      <div className="flex gap-4 mt-6 pt-4 border-t border-gray-200 flex-wrap">
+                                      <div className="flex flex-wrap gap-3 mt-4">
                                         <InvoiceGenerator booking={booking} logoUrl='https://www.wavescation.com/assets/logo-DC0iQ2p5.png' />
 
                                         {canRateBooking(booking) && (
@@ -1043,7 +1207,7 @@ const ProfilePage = () => {
                                               setSelectedBookingForRating(booking);
                                               setShowRatingModal(true);
                                             }}
-                                            className="px-6 py-3 bg-yellow-500 text-white rounded-2xl hover:bg-yellow-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg"
+                                            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg"
                                           >
                                             <Star className="w-4 h-4" />
                                             Rate & Review
@@ -1054,7 +1218,7 @@ const ProfilePage = () => {
                                           <button
                                             onClick={() => setConfirmCancel(booking._id)}
                                             disabled={loading}
-                                            className="px-6 py-3 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg disabled:opacity-50"
+                                            className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 font-semibold shadow-lg disabled:opacity-50"
                                           >
                                             <XCircle className="w-4 h-4" />
                                             Cancel Booking
@@ -1069,7 +1233,7 @@ const ProfilePage = () => {
                                       </div>
                                     )}
 
-                                    <div className="mt-4 text-xs text-gray-500">
+                                    <div className="text-xs text-gray-400 mt-2">
                                       Booking ID: {booking._id}
                                     </div>
                                   </div>
@@ -1084,8 +1248,101 @@ const ProfilePage = () => {
                 </div>
               </div>
             )}
+
             {activeTab === 'reviews' && (
-              <MyReviews />
+              <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-xl flex items-center justify-center">
+                      <Star className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900">My Reviews</h2>
+                  </div>
+                  <MyReviews />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="bg-white rounded-3xl shadow-xl border border-blue-100 overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(24,70,202,0.08)' }}>
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] rounded-xl flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900">Settings</h2>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Notification Preferences */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Bell className="w-5 h-5 text-[#1846ca]" />
+                        <h3 className="font-bold text-gray-900">Notification Preferences</h3>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="flex items-center gap-3">
+                          <input type="checkbox" className="w-5 h-5 rounded border-blue-300 text-[#1846ca] focus:ring-[#1846ca]" defaultChecked />
+                          <span className="text-sm text-gray-700">Email notifications for booking updates</span>
+                        </label>
+                        <label className="flex items-center gap-3">
+                          <input type="checkbox" className="w-5 h-5 rounded border-blue-300 text-[#1846ca] focus:ring-[#1846ca]" defaultChecked />
+                          <span className="text-sm text-gray-700">SMS notifications for check-in reminders</span>
+                        </label>
+                        <label className="flex items-center gap-3">
+                          <input type="checkbox" className="w-5 h-5 rounded border-blue-300 text-[#1846ca] focus:ring-[#1846ca]" />
+                          <span className="text-sm text-gray-700">Promotional emails and offers</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Language & Currency */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Globe className="w-5 h-5 text-[#1846ca]" />
+                        <h3 className="font-bold text-gray-900">Language & Currency</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">Language</label>
+                          <select className="w-full px-4 py-3 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 bg-white">
+                            <option>English</option>
+                            <option>Arabic</option>
+                            <option>Russian</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest text-blue-400 mb-2">Currency</label>
+                          <select className="w-full px-4 py-3 border-2 border-blue-100 rounded-xl focus:border-[#1846ca] focus:ring-4 focus:ring-blue-100 bg-white">
+                            <option>AED (د.إ)</option>
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Help & Support */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <HelpCircle className="w-5 h-5 text-[#1846ca]" />
+                        <h3 className="font-bold text-gray-900">Help & Support</h3>
+                      </div>
+                      <div className="space-y-3">
+                        <a href="#" className="block text-sm text-gray-700 hover:text-[#1846ca] transition-colors">FAQs</a>
+                        <a href="#" className="block text-sm text-gray-700 hover:text-[#1846ca] transition-colors">Contact Support</a>
+                        <a href="#" className="block text-sm text-gray-700 hover:text-[#1846ca] transition-colors">Terms of Service</a>
+                        <a href="#" className="block text-sm text-gray-700 hover:text-[#1846ca] transition-colors">Privacy Policy</a>
+                      </div>
+                    </div>
+
+                    {/* Save Settings Button */}
+                    <button className="w-full py-4 bg-gradient-to-r from-[#1846ca] to-[#2a5ae0] text-white rounded-xl hover:from-[#1234a0] hover:to-[#1846ca] transition-all duration-300 transform hover:scale-[1.02] font-bold shadow-lg">
+                      Save Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
