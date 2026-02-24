@@ -1,0 +1,24 @@
+# humans.txt for Alekn Alraqy Hotel Management
+# https://www.alrknalraqy.in/humans.txt
+
+/* TEAM */
+Developer: Your Name
+Site: https://www.alrknalraqy.in
+Location: Dubai, UAE
+From: 2022
+
+/* CREDITS */
+Designer: Your Designer Name
+Copywriter: Your Copywriter Name
+Photography: Your Photographer Name
+
+/* THANKS */
+Special thanks to all our guests and partners who inspire us daily.
+
+/* SITE INFO */
+Standards: HTML5, CSS3, JavaScript, React
+Components: Google Fonts, Inter
+Software: VS Code, Git
+
+/* UPDATED */
+Last update: 2024-01-15

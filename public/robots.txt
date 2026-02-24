@@ -1,0 +1,72 @@
+# robots.txt for Alekn Alraqy Hotel Management
+# https://www.alrknalraqy.in/
+
+# Allow all crawlers full access
+User-agent: *
+Allow: /
+
+# Specify sitemap location
+Sitemap: https://www.alrknalraqy.in/sitemap.xml
+
+# Crawl-delay: 1 (optional - uncomment if needed)
+# Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /cgi-bin/
+Disallow: /wp-admin/
+Disallow: /private/
+Disallow: /tmp/
+Disallow: /temp/
+Disallow: /draft/
+Disallow: /drafts/
+Disallow: /preview/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /my-account/
+Disallow: /login/
+Disallow: /register/
+Disallow: /logout/
+Disallow: /*?*
+Disallow: /*.pdf$
+Disallow: /*.zip$
+Disallow: /*.doc$
+Disallow: /*.mp3$
+
+# Specific crawler rules (optional)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+User-agent: Twitterbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Facebookexternalhit
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots (optional)
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
