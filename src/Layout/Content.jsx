@@ -12,10 +12,11 @@ import Trivago from "../assets/Trivago.png";
 import Hotels from "../assets/Hotels.png";
 import Agoda from "../assets/Agoda.png";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-
+import { baseurl } from '../Base/Base';
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const SectionLabel = ({ children, light = false }) => (
@@ -40,22 +41,110 @@ const SectionTitle = ({ children, highlight, light = false }) => (
   </h2>
 );
 
+const HotelCard = ({ hotel, featured = false }) => {
+  const navigate = useNavigate();
+  const cardRef = useRef(null);
+  
+  useEffect(() => {
+    if (cardRef.current) {
+      gsap.fromTo(cardRef.current,
+        { y: 30, opacity: 0 },
+        { 
+          y: 0, 
+          opacity: 1, 
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: "top 90%"
+          }
+        }
+      );
+    }
+  }, []);
+
+  const getLowestPrice = (pricing) => {
+    const prices = [];
+    if (pricing?.night) prices.push(pricing.night);
+    if (pricing?.week) prices.push(pricing.week / 7);
+    if (pricing?.month) prices.push(pricing.month / 30);
+    if (pricing?.year) prices.push(pricing.year / 365);
+    return prices.length > 0 ? Math.min(...prices) : 0;
+  };
+
+  const lowestPrice = getLowestPrice(hotel.pricing);
+
+  return (
+    <div 
+      ref={cardRef} 
+      onClick={() => navigate(`/property/${hotel._id}`)} 
+      className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100"
+    >
+      <div className="relative overflow-hidden h-48">
+        <img 
+          src={hotel.images?.[0]?.url || hotel.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'} 
+          alt={hotel.name || hotel.title} 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945';
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {(featured || hotel.isFeatured) && (
+          <div className="absolute top-3 left-3 px-3 py-1 text-xs font-bold text-white rounded-lg" style={{ background: '#f59e0b' }}>Featured</div>
+        )}
+        {hotel.bookingCount > 5 && (
+          <div className="absolute top-3 right-3 px-3 py-1 text-xs font-bold text-white rounded-lg" style={{ background: '#10b981' }}>
+            {hotel.bookingCount}+ bookings
+          </div>
+        )}
+        <button className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
+          <Heart className="h-4 w-4 text-blue-600" />
+        </button>
+        <div className="absolute bottom-3 left-3 right-3 flex gap-1">
+          {(hotel.propertyHighlights || hotel.amenities || []).slice(0,3).map((a, i) => (
+            <span key={i} className="text-[10px] font-bold bg-white/90 backdrop-blur text-gray-800 px-2 py-1 rounded-full">
+              {a.name || a}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="p-5">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-bold text-gray-900 text-base line-clamp-1 flex-1 mr-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            {hotel.name || hotel.title}
+          </h3>
+          <div className="flex items-center gap-1 shrink-0 bg-blue-50 px-2 py-1 rounded-lg">
+            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+            <span className="text-xs font-bold text-gray-800">{hotel.ratings?.average?.toFixed(1) || hotel.rating || 4.5}</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+          <MapPin className="h-3 w-3 text-blue-400" />
+          {hotel.neighborhood?.name || hotel.location || 'Dubai'}
+        </p>
+        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+          <div>
+            <span className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "'Sora', sans-serif" }}>
+              AED {Math.round(lowestPrice)}
+            </span>
+            <span className="text-xs text-gray-400 ml-1">/night</span>
+          </div>
+          <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">
+            {hotel.ratings?.total || hotel.reviews || 0} reviews
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ContentSections = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
-  const [activeTab, setActiveTab] = useState('featured');
-  const [featuredHotels] = useState([
-    { id:1, name:"Royal Suite Burj View", location:"Downtown Dubai", price:1200, rating:5.0, reviews:156, image:"https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Infinity Pool","Spa","Butler","Fine Dining"] },
-    { id:2, name:"Palm Jumeirah Palace", location:"Palm Jumeirah", price:2500, rating:5.0, reviews:89, image:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Private Beach","Yacht","Helipad","Royal Spa"] },
-    { id:3, name:"Marina Sky Penthouse", location:"Dubai Marina", price:1800, rating:4.9, reviews:234, image:"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Rooftop Pool","Gym","Cinema","Concierge"] },
-    { id:4, name:"Emirates Hills Mansion", location:"Emirates Hills", price:3500, rating:5.0, reviews:67, image:"https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Tennis Court","Private Pool","Staff","Wine Cellar"] },
-  ]);
-  const [recommendedHotels] = useState([
-    { id:5, name:"JBR Beach Resort", location:"Jumeirah Beach", price:650, rating:4.8, reviews:445, image:"https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Beach","Kids Club","Pool","Sports"] },
-    { id:6, name:"Business Bay Executive", location:"Business Bay", price:550, rating:4.7, reviews:312, image:"https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Business Ctr","Meetings","Gym","Restaurant"] },
-    { id:7, name:"Al Barsha Family Villa", location:"Al Barsha", price:420, rating:4.9, reviews:189, image:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Garden","BBQ","Playground","Parking"] },
-    { id:8, name:"Dubai Hills Golf Resort", location:"Dubai Hills", price:750, rating:4.9, reviews:156, image:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", amenities:["Golf","Spa","Pool","Fine Dining"] },
-  ]);
+  const [featuredHotels, setFeaturedHotels] = useState([]);
+  const [recommendedHotels, setRecommendedHotels] = useState([]);
+  const [loading, setLoading] = useState({ featured: true, recommended: true });
   const navigate = useNavigate();
+  
   const sectionsRef = useRef([]);
   const partnersRef = useRef(null);
   const locationCardsRef = useRef([]);
@@ -63,6 +152,57 @@ const ContentSections = () => {
   const servicesRef = useRef([]);
   const statsRef = useRef([]);
   const titleRefs = useRef([]);
+  const [destinations, setDestinations] = useState([])
+
+  const fetchLocations = async () => {
+    try {
+      const response = await axios.get(`${baseurl}user/location`);
+      console.log(response)
+      if (response.data.success) {
+        setDestinations(response.data.location || []);
+      }
+    } catch (error) {
+      console.error('Error fetching locations :', error);
+      setDestinations([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const fetchFeaturedProperties = async () => {
+      try {
+        setLoading(prev => ({ ...prev, featured: true }));
+        const response = await axios.get(`${baseurl}user/properties/featured`);
+        if (response.data.success) {
+          setFeaturedHotels(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching featured properties:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, featured: false }));
+      }
+    };
+
+    const fetchRecommendedProperties = async () => {
+      try {
+        setLoading(prev => ({ ...prev, recommended: true }));
+        const response = await axios.get(`${baseurl}user/properties/recommended`);
+        if (response.data.success) {
+          setRecommendedHotels(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching recommended properties:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, recommended: false }));
+      }
+    };
+
+    fetchFeaturedProperties();
+    fetchRecommendedProperties();
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -203,7 +343,7 @@ const ContentSections = () => {
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [featuredHotels, recommendedHotels, destinations]);
 
   const partners = [
     { name:"Airbnb", logo:Airbnb }, { name:"Booking.com", logo:Booking },
@@ -249,15 +389,6 @@ const ContentSections = () => {
     { name:'Aisha Al-Mansouri', rating:5, review:'Perfect blend of luxury and comfort. The team anticipated our every need and ensured a flawless experience. Highly recommended.', location:'Abu Dhabi', image:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
   ];
 
-  const destinations = [
-    { name:'Dubai Marina', properties:24, image:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { name:'Palm Jumeirah', properties:18, image:'https://images.unsplash.com/photo-1549138144-7e5a56e1e7a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { name:'Downtown Dubai', properties:31, image:'https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { name:'Jumeirah Beach', properties:15, image:'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { name:'Business Bay', properties:22, image:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { name:'Emirates Hills', properties:12, image:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-  ];
-
   const amenities = [
     { icon: <Wifi className="h-5 w-5" />, label: 'Free WiFi' },
     { icon: <Coffee className="h-5 w-5" />, label: 'Breakfast' },
@@ -267,65 +398,20 @@ const ContentSections = () => {
     { icon: <Camera className="h-5 w-5" />, label: 'City Views' },
   ];
 
-  const HotelCard = ({ hotel, featured = false }) => {
-    const cardRef = useRef(null);
-    
-    useEffect(() => {
-      if (cardRef.current) {
-        gsap.fromTo(cardRef.current,
-          { y: 30, opacity: 0 },
-          { 
-            y: 0, 
-            opacity: 1, 
-            duration: 0.8,
-            scrollTrigger: {
-              trigger: cardRef.current,
-              start: "top 90%"
-            }
-          }
-        );
-      }
-    }, []);
-
-    return (
-      <div ref={cardRef} onClick={() => navigate(`/property/${hotel.id}`)} className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100">
-        <div className="relative overflow-hidden h-48">
-          <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          {featured && (
-            <div className="absolute top-3 left-3 px-3 py-1 text-xs font-bold text-white rounded-lg" style={{ background: '#f59e0b' }}>Featured</div>
-          )}
-          <button className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
-            <Heart className="h-4 w-4 text-blue-600" />
-          </button>
-          <div className="absolute bottom-3 left-3 right-3 flex gap-1">
-            {hotel.amenities.slice(0,3).map((a, i) => (
-              <span key={i} className="text-[10px] font-bold bg-white/90 backdrop-blur text-gray-800 px-2 py-1 rounded-full">{a}</span>
-            ))}
+  const LoadingSkeleton = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[1,2,3,4].map(i => (
+        <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 animate-pulse">
+          <div className="h-48 bg-gray-200"></div>
+          <div className="p-5">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
           </div>
         </div>
-        <div className="p-5">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-bold text-gray-900 text-base line-clamp-1 flex-1 mr-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{hotel.name}</h3>
-            <div className="flex items-center gap-1 shrink-0 bg-blue-50 px-2 py-1 rounded-lg">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-bold text-gray-800">{hotel.rating}</span>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
-            <MapPin className="h-3 w-3 text-blue-400" />{hotel.location}
-          </p>
-          <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-            <div>
-              <span className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "'Sora', sans-serif" }}>${hotel.price}</span>
-              <span className="text-xs text-gray-400 ml-1">/night</span>
-            </div>
-            <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">{hotel.reviews} reviews</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+      ))}
+    </div>
+  );
 
   return (
     <div style={{ background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -334,7 +420,6 @@ const ContentSections = () => {
         .char { display: inline-block; }
       `}</style>
 
-      {/* Stats Section */}
       <section ref={el => sectionsRef.current[0] = el} className="py-12 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -351,7 +436,6 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Partners */}
       <section ref={el => sectionsRef.current[1] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -369,7 +453,6 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Why Choose Us */}
       <section ref={el => sectionsRef.current[2] = el} className="py-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -393,7 +476,6 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Special Offers */}
       <section ref={el => sectionsRef.current[3] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -437,34 +519,57 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Tabs for Hotels */}
       <section ref={el => sectionsRef.current[4] = el} className="py-20 px-4 md:px-6" style={{ background: '#f8fafc' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <SectionLabel>Top Picks</SectionLabel>
-            <SectionTitle highlight="Hotels">Featured</SectionTitle>
+            <SectionLabel>Curated Selection</SectionLabel>
+            <SectionTitle highlight="Properties">Featured</SectionTitle>
           </div>
 
-          <div className="flex justify-center gap-4 mb-10">
-            <button 
-              onClick={() => setActiveTab('featured')}
-              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'featured' ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-gray-600 hover:bg-blue-50'}`}
-            >
-              Featured Hotels
-            </button>
-            <button 
-              onClick={() => setActiveTab('recommended')}
-              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'recommended' ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-gray-600 hover:bg-blue-50'}`}
-            >
-              Recommended
-            </button>
+          {loading.featured ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {featuredHotels.slice(0, 4).map(hotel => (
+                  <HotelCard key={hotel._id} hotel={hotel} featured={true} />
+                ))}
+              </div>
+
+              {featuredHotels.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No featured properties available</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
+      <section ref={el => sectionsRef.current[5] = el} className="py-20 px-4 md:px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <SectionLabel>Most Popular</SectionLabel>
+            <SectionTitle highlight="Choices">Top</SectionTitle>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {(activeTab === 'featured' ? featuredHotels : recommendedHotels).map(h => (
-              <HotelCard key={h.id} hotel={h} featured={activeTab === 'featured'} />
-            ))}
-          </div>
+          {loading.recommended ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {recommendedHotels.slice(0, 4).map(hotel => (
+                  <HotelCard key={hotel._id} hotel={hotel} />
+                ))}
+              </div>
+
+              {recommendedHotels.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No recommended properties available</p>
+                </div>
+              )}
+            </>
+          )}
 
           <div className="text-center mt-10">
             <button onClick={() => navigate('/property')} className="inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-sm text-white transition-all hover:shadow-xl hover:scale-105" style={{ background: 'linear-gradient(135deg, #1d4ed8, #1e40af)' }}>
@@ -474,7 +579,6 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Amenities Bar */}
       <section className="py-12 px-4 md:px-6 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap justify-center gap-6 md:gap-10">
@@ -490,36 +594,39 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Prime Locations */}
-      <section ref={el => sectionsRef.current[5] = el} className="py-20 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
+      <section ref={el => sectionsRef.current[6] = el} className="py-20 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel>Destinations</SectionLabel>
             <SectionTitle highlight="Locations">Prime</SectionTitle>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations.map((d, i) => (
-              <div key={i} ref={el => locationCardsRef.current[i] = el}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300">
+            {destinations && destinations.length > 0 ? destinations.map((d, i) => (
+              <div key={d._id || i} ref={el => locationCardsRef.current[i] = el}
+                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300"
+                onClick={() => navigate(`/property?locationId=${d._id}`)}>
                 <img src={d.image} alt={d.name} className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
                   <div>
                     <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "'Sora', sans-serif" }}>{d.name}</h3>
-                    <p className="text-blue-200 text-sm">{d.properties} properties</p>
+                    <p className="text-blue-200 text-sm">{d.properties || 0} properties</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all">
                     <ArrowRight className="h-4 w-4 text-blue-900" />
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-3 text-center py-12">
+                <p className="text-gray-500">No locations available</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Services */}
-      <section ref={el => sectionsRef.current[6] = el} className="py-20 px-4 md:px-6 text-white" style={{ background: 'linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)' }}>
+      <section ref={el => sectionsRef.current[7] = el} className="py-20 px-4 md:px-6 text-white" style={{ background: 'linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel light>What We Do</SectionLabel>
@@ -548,8 +655,7 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Reviews */}
-      <section ref={el => sectionsRef.current[7] = el} className="py-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
+      <section ref={el => sectionsRef.current[8] = el} className="py-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel>Reviews</SectionLabel>
@@ -583,8 +689,7 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section ref={el => sectionsRef.current[8] = el} className="py-20 px-4 md:px-6 bg-white">
+      <section ref={el => sectionsRef.current[9] = el} className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel>FAQ</SectionLabel>
@@ -617,8 +722,7 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Vision & Mission */}
-      <section ref={el => sectionsRef.current[9] = el} className="py-20 px-4 md:px-6">
+      <section ref={el => sectionsRef.current[10] = el} className="py-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <SectionLabel>About Us</SectionLabel>
@@ -659,7 +763,6 @@ const ContentSections = () => {
         </div>
       </section>
 
-      {/* Newsletter */}
       <section className="py-16 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-white mb-4" style={{ fontFamily: "'Sora', sans-serif" }}>Get Exclusive Deals</h2>
