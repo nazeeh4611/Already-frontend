@@ -593,38 +593,50 @@ const ContentSections = () => {
           </div>
         </div>
       </section>
-
       <section ref={el => sectionsRef.current[6] = el} className="py-20 px-4 md:px-6 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <SectionLabel>Destinations</SectionLabel>
-            <SectionTitle highlight="Locations">Prime</SectionTitle>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations && destinations.length > 0 ? destinations.map((d, i) => (
-              <div key={d._id || i} ref={el => locationCardsRef.current[i] = el}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300"
-                onClick={() => navigate(`/property?locationId=${d._id}`)}>
-                <img src={d.image} alt={d.name} className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "'Sora', sans-serif" }}>{d.name}</h3>
-                    <p className="text-blue-200 text-sm">{d.properties || 0} properties</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all">
-                    <ArrowRight className="h-4 w-4 text-blue-900" />
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div className="col-span-3 text-center py-12">
-                <p className="text-gray-500">No locations available</p>
-              </div>
-            )}
+  <div className="max-w-7xl mx-auto">
+    <div className="text-center mb-12">
+      <SectionLabel>Destinations</SectionLabel>
+      <SectionTitle highlight="Locations">Prime</SectionTitle>
+    </div>
+    
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {destinations && destinations.length > 0 ? destinations.slice(0, 6).map((d, i) => (
+        <div key={d._id || i} ref={el => locationCardsRef.current[i] = el}
+          className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[4/3]"
+          onClick={() => navigate(`/property?locationId=${d._id}`)}>
+          <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 flex justify-between items-end">
+            <div>
+              <h3 className="text-lg md:text-xl font-bold text-white mb-1" style={{ fontFamily: "'Sora', sans-serif" }}>{d.name}</h3>
+              <p className="text-blue-200 text-xs md:text-sm">{d.properties || 0} properties</p>
+            </div>
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-yellow-400 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all">
+              <ArrowRight className="h-3 w-3 md:h-4 md:w-4 text-blue-900" />
+            </div>
           </div>
         </div>
-      </section>
+      )) : (
+        <div className="col-span-2 md:col-span-3 text-center py-12">
+          <p className="text-gray-500">No locations available</p>
+        </div>
+      )}
+    </div>
+
+    {destinations && destinations.length > 6 && (
+      <div className="text-center mt-10">
+        <button 
+          onClick={() => window.location.href = 'https://www.alrknalraqy.in/property'}
+          className="inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-sm text-white transition-all hover:shadow-xl hover:scale-105" 
+          style={{ background: 'linear-gradient(135deg, #1d4ed8, #1e40af)' }}
+        >
+          View More Locations <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    )}
+  </div>
+</section>
 
       <section ref={el => sectionsRef.current[7] = el} className="py-20 px-4 md:px-6 text-white" style={{ background: 'linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)' }}>
         <div className="max-w-7xl mx-auto">
